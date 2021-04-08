@@ -23,7 +23,6 @@ func init() {
 }
 
 func main() {
-	c := container.GetContainer()
+	//c := container.GetContainer()
 
-	fmt.Println(c.GetDb())
 }

@@ -7,3 +7,6 @@ mysql:
   charset: utf8mb4
   parseTime: true
   location: Asia%2FShanghai
+
+http-server:
+  port: 8888
