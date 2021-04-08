@@ -1,9 +1,9 @@
 package main
 
 import (
+	"charge/pkg/container"
 	"charge/pkg/initial"
 	"fmt"
-	"github.com/spf13/viper"
 	"os"
 )
 
@@ -17,10 +17,13 @@ func init() {
 	if err != nil {
 		fmt.Println("Connect db fail:", err)
 	}
-	fmt.Println(db)
+	// 存入 container
+	c := container.GetContainer()
+	c.SetDb(db)
 }
 
 func main() {
-	fmt.Println(viper.Get("mysql"))
-	fmt.Println(viper.GetString("mysql.charset"))
+	c := container.GetContainer()
+
+	fmt.Println(c.GetDb())
 }
