@@ -4,3 +4,4 @@ tmp
 tmp/*
 /main
 /charge
+/config/app.yaml
