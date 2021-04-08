@@ -1,7 +1,7 @@
 package main
 
 import (
-	"charge/initial"
+	"charge/pkg/initial"
 	"fmt"
 	"github.com/spf13/viper"
 	"os"
