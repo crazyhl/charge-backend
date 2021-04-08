@@ -4,6 +4,8 @@ import (
 	"charge/pkg/container"
 	"charge/pkg/initial"
 	"fmt"
+	"github.com/gofiber/fiber/v2"
+	"github.com/spf13/viper"
 	"os"
 )
 
@@ -16,6 +18,7 @@ func init() {
 	db, err := initial.NewDb()
 	if err != nil {
 		fmt.Println("Connect db fail:", err)
+		os.Exit(2)
 	}
 	// 存入 container
 	c := container.GetContainer()
@@ -24,5 +27,18 @@ func init() {
 
 func main() {
 	//c := container.GetContainer()
+	app := fiber.New(fiber.Config{
+		Prefork: true,
+		ServerHeader: "Cimple-Fiber",
+	})
 
+	if !fiber.IsChild() {
+		// 只有在主线程的时候才会auto merge 数据结构
+	}
+
+	err := app.Listen(viper.GetString("http-server.host") + ":" + viper.GetString("http-server.port"))
+	if err != nil {
+		fmt.Println("Start Server Error:", err)
+		os.Exit(3)
+	}
 }
