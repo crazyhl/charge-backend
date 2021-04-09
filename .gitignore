@@ -5,3 +5,5 @@ tmp/*
 /main
 /charge
 /config/app.yaml
+/*.db
+/go_build_charge

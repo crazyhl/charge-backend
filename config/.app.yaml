@@ -1,12 +1,6 @@
-mysql:
-  username: root
-  password: 123456
-  host: 127.0.0.1
-  port: 33060
-  database: charge
-  charset: utf8mb4
-  parseTime: true
-  location: Asia%2FShanghai
+db:
+  path: ./
+  name: name.db
 
 http-server:
   host: 127.0.0.1
