@@ -34,7 +34,11 @@ func main() {
 
 	if !fiber.IsChild() {
 		// 只有在主线程的时候才会auto merge 数据结构
-		initial.AutoMigrate()
+		err := initial.AutoMigrate()
+		if err != nil {
+			fmt.Println("Migrate db fail:", err)
+			os.Exit(4)
+		}
 	}
 
 	err := app.Listen(viper.GetString("http-server.host") + ":" + viper.GetString("http-server.port"))
