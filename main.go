@@ -1,8 +1,8 @@
 package main
 
 import (
-	"charge/pkg/container"
-	"charge/pkg/initial"
+	"charge/container"
+	"charge/initial"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/viper"
@@ -28,12 +28,13 @@ func init() {
 func main() {
 	//c := container.GetContainer()
 	app := fiber.New(fiber.Config{
-		Prefork: true,
+		Prefork:      true,
 		ServerHeader: "Cimple-Fiber",
 	})
 
 	if !fiber.IsChild() {
 		// 只有在主线程的时候才会auto merge 数据结构
+		initial.AutoMigrate()
 	}
 
 	err := app.Listen(viper.GetString("http-server.host") + ":" + viper.GetString("http-server.port"))
