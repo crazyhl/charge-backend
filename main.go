@@ -41,6 +41,12 @@ func main() {
 		}
 	}
 
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Render("index", fiber.Map{
+			"hello": "world",
+		})
+	})
+
 	err := app.Listen(viper.GetString("http-server.host") + ":" + viper.GetString("http-server.port"))
 	if err != nil {
 		fmt.Println("Start Server Error:", err)
