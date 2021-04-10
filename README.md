@@ -7,4 +7,4 @@
 
 * TBD
 
-![](./description.png)
+![](./charge.png)

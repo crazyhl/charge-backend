@@ -6,7 +6,7 @@ import (
 )
 
 // AddAccount 增加账户
-func AddAccount(name string, opts ...AccountOptions) (uint, error) {
+func AddAccount(name string, opts ...Options) (uint, error) {
 	account := new(models.Account)
 	account.Name = name
 
@@ -22,21 +22,27 @@ func AddAccount(name string, opts ...AccountOptions) (uint, error) {
 
 // ------------ 上面各种方法用的 with 函数 -------------------
 
-type AccountOptions func(account *models.Account)
+type Options func(account *models.Account)
 
-func WithHasCredit(hasCredit uint8) AccountOptions {
+func WithName(name string) Options {
+	return func(account *models.Account) {
+		account.Name = name
+	}
+}
+
+func WithHasCredit(hasCredit uint8) Options {
 	return func(account *models.Account) {
 		account.HasCredit = hasCredit
 	}
 }
 
-func WithCash(cash int64) AccountOptions {
+func WithCash(cash int64) Options {
 	return func(account *models.Account) {
 		account.Cash = cash
 	}
 }
 
-func WithCredit(credit int64) AccountOptions {
+func WithCredit(credit int64) Options {
 	return func(account *models.Account) {
 		if credit > 0 {
 			credit = credit * -1
@@ -45,13 +51,13 @@ func WithCredit(credit int64) AccountOptions {
 	}
 }
 
-func WithSort(sort uint8) AccountOptions {
+func WithSort(sort uint8) Options {
 	return func(account *models.Account) {
 		account.Sort = sort
 	}
 }
 
-func WithChangeAt(time int) AccountOptions {
+func WithChangeAt(time int) Options {
 	return func(account *models.Account) {
 		account.ChangeAt = time
 	}
