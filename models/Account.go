@@ -8,7 +8,7 @@ type Account struct {
 	Cash      int64  `gorm:"default:0;not null"`
 	Credit    int64  `gorm:"default:0;not null"`
 	Sort      uint8  `gorm:"index;default:0;not null"`
-	CreateAt  int    `gorm:"autoCreateTime;default:0;not null"`
-	UpdateAt  int    `gorm:"autoUpdateTime;default:0;not null"`
-	ChangeAt  int    `gorm:"default:0;not null"`
+	CreateAt  int64  `gorm:"autoCreateTime"`
+	UpdateAt  int64  `gorm:"autoUpdateTime"`
+	ChangeAt  int64  `gorm:"default:0;not null"`
 }

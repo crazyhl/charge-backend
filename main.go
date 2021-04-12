@@ -54,7 +54,7 @@ func main() {
 	})
 
 	accountGroup := app.Group("/account")
-	accountGroup.Post("/", account.Add)
+	accountGroup.Post("", account.Add)
 
 	err := app.Listen(viper.GetString("http-server.host") + ":" + viper.GetString("http-server.port"))
 	if err != nil {

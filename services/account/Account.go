@@ -57,7 +57,7 @@ func WithSort(sort uint8) Options {
 	}
 }
 
-func WithChangeAt(time int) Options {
+func WithChangeAt(time int64) Options {
 	return func(account *models.Account) {
 		account.ChangeAt = time
 	}
