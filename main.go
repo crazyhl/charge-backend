@@ -5,6 +5,7 @@ import (
 	"charge/initial"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/spf13/viper"
 	"os"
 )
@@ -31,6 +32,10 @@ func main() {
 		Prefork:      true,
 		ServerHeader: "Cimple-Fiber",
 	})
+	// 跨域
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:8080",
+	}))
 
 	if !fiber.IsChild() {
 		// 只有在主线程的时候才会auto merge 数据结构
@@ -42,8 +47,8 @@ func main() {
 	}
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.Render("index", fiber.Map{
-			"hello": "world",
+		return c.JSON(fiber.Map{
+			"fdas": "aabbcc",
 		})
 	})
 
