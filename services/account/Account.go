@@ -6,7 +6,7 @@ import (
 )
 
 // AddAccount 增加账户
-func AddAccount(name string, opts ...Options) (uint, error) {
+func AddAccount(name string, opts ...Options) (*models.Account, error) {
 	account := new(models.Account)
 	account.Name = name
 
@@ -17,7 +17,7 @@ func AddAccount(name string, opts ...Options) (uint, error) {
 	db := container.GetContainer().GetDb()
 	result := db.Create(account)
 
-	return account.ID, result.Error
+	return account, result.Error
 }
 
 // ------------ 上面各种方法用的 with 函数 -------------------

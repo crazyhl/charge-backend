@@ -2,6 +2,7 @@ package main
 
 import (
 	"charge/container"
+	"charge/controller/account"
 	"charge/initial"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
@@ -51,6 +52,9 @@ func main() {
 			"fdas": "aabbcc",
 		})
 	})
+
+	accountGroup := app.Group("/account")
+	accountGroup.Post("/", account.Add)
 
 	err := app.Listen(viper.GetString("http-server.host") + ":" + viper.GetString("http-server.port"))
 	if err != nil {
