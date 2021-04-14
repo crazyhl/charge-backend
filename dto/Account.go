@@ -1,7 +1,7 @@
 package dto
 
 // Account 账户模型
-type Account struct {
+type AccountList struct {
 	ID        uint    `json:"id"`
 	Name      string  `json:"name"`
 	HasCredit bool    `json:"has_credit"`
@@ -11,4 +11,13 @@ type Account struct {
 	CreateAt  string  `json:"create_at"`
 	UpdateAt  string  `json:"update_at"`
 	ChangeAt  string  `json:"change_at"'`
+}
+
+type AccountEditDetail struct {
+	ID        uint    `json:"id"`
+	Name      string  `json:"name"`
+	HasCredit bool    `json:"has_credit"`
+	Cash      float64 `json:"cash"`
+	Credit    float64 `json:"credit"`
+	Sort      uint8   `json:"sort"`
 }

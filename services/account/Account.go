@@ -9,8 +9,8 @@ import (
 )
 
 // List 账户列表，会返回所有的账户
-func List() []dto.Account {
-	var accounts []dto.Account
+func List() []dto.AccountList {
+	var accounts []dto.AccountList
 	var accountRows []models.Account
 	db := container.GetContainer().GetDb()
 	db.Order("sort DESC").Find(&accountRows)
@@ -19,7 +19,7 @@ func List() []dto.Account {
 		createTm := time.Unix(acc.CreateAt, 0)
 		updateTm := time.Unix(acc.UpdateAt, 0)
 		changeTm := time.Unix(acc.ChangeAt, 0)
-		accounts = append(accounts, dto.Account{
+		accounts = append(accounts, dto.AccountList{
 			ID:        acc.ID,
 			Name:      acc.Name,
 			HasCredit: acc.HasCredit == 1,
@@ -58,6 +58,43 @@ func Delete(id uint) (*models.Account, error) {
 	}
 
 	result := db.Delete(account)
+
+	return account, result.Error
+}
+
+func EditDetail(id int) (*dto.AccountEditDetail, error) {
+	db := container.GetContainer().GetDb()
+	accountDto := new(dto.AccountEditDetail)
+	account := new(models.Account)
+	result := db.Where("id = ?", id).First(account)
+	if result.Error != nil {
+		return accountDto, result.Error
+	}
+
+	accountDto.ID = account.ID
+	accountDto.Name = account.Name
+	accountDto.HasCredit = account.HasCredit == 1
+	accountDto.Cash = float64(account.Cash) / 1000.0
+	accountDto.Credit = float64(account.Credit) / 1000.0
+	accountDto.Sort = account.Sort
+
+	return accountDto, nil
+}
+
+// Add 增加账户
+func Edit(id int, opts ...Options) (*models.Account, error) {
+	db := container.GetContainer().GetDb()
+	account := new(models.Account)
+	db.Where("id = ?", id).First(account)
+	if account.ID == 0 {
+		return account, errors.New("更新对象不存在")
+	}
+
+	for _, o := range opts {
+		o(account)
+	}
+
+	result := db.Save(account)
 
 	return account, result.Error
 }
