@@ -1,5 +1,8 @@
 package models
 
+// 绑定类型
+// 收入 0 支出 1 借 2 还 3 转 4
+
 // Category 分类
 type Category struct {
 	ID   uint   `gorm:"primaryKey"`

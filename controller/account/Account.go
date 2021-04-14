@@ -1,6 +1,7 @@
 package account
 
 import (
+	"charge/dto"
 	"charge/services/account"
 	"charge/utils"
 	"fmt"
@@ -13,6 +14,15 @@ type addAccount struct {
 	Cash      float64 `json:"cash" form:"cash"`
 	Credit    float64 `json:"credit" form:"credit"`
 	Sort      uint8   `json:"sort" form:"sort"`
+}
+
+func List(ctx *fiber.Ctx) error {
+	var accounts []dto.Account
+	accounts = account.List()
+	return ctx.JSON(fiber.Map{
+		"status": 0,
+		"data":   accounts,
+	})
 }
 
 func Add(ctx *fiber.Ctx) error {
@@ -40,7 +50,7 @@ func Add(ctx *fiber.Ctx) error {
 	}
 	credit := int64(acc.Credit * 1000)
 
-	newAccount, err := account.AddAccount(
+	newAccount, err := account.Add(
 		acc.Name,
 		account.WithCash(cash),
 		account.WithHasCredit(uint8(hasCredit)),
@@ -59,5 +69,27 @@ func Add(ctx *fiber.Ctx) error {
 		"status":  0,
 		"data":    newAccount,
 		"message": "添加成功",
+	})
+}
+
+// Delete 删除账户
+func Delete(ctx *fiber.Ctx) error {
+	id, err := ctx.ParamsInt("id")
+	if err != nil {
+		return ctx.JSON(fiber.Map{
+			"status":  -1,
+			"message": err.Error(),
+		})
+	}
+	_, err = account.Delete(uint(id))
+	if err != nil {
+		return ctx.JSON(fiber.Map{
+			"status":  -2,
+			"message": err.Error(),
+		})
+	}
+	return ctx.JSON(fiber.Map{
+		"status":  0,
+		"message": "删除成功",
 	})
 }

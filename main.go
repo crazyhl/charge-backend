@@ -47,18 +47,15 @@ func main() {
 		}
 	}
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"fdas": "aabbcc",
-		})
-	})
-
 	accountGroup := app.Group("/account")
 	accountGroup.Post("", account.Add)
+	accountGroup.Get("/list", account.List)
+	accountGroup.Delete("/:id", account.Delete)
 
 	err := app.Listen(viper.GetString("http-server.host") + ":" + viper.GetString("http-server.port"))
 	if err != nil {
 		fmt.Println("Start Server Error:", err)
 		os.Exit(3)
 	}
+
 }
