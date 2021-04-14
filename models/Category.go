@@ -8,4 +8,5 @@ type Category struct {
 	ID   uint   `gorm:"primaryKey"`
 	Type uint8  `gorm:"not null;uniqueIndex:'uk_type_name'"`
 	Name string `gorm:"uniqueIndex:'uk_type_name';not null"`
+	Sort uint8  `gorm:"index;default:0;not null"`
 }
