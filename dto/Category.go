@@ -1,9 +1,11 @@
 package dto
 
-import "charge/models"
-
 // CategoryGroup 账户模型
-type CategoryGroup struct {
-	Type       uint8             `json:"type"`
-	Categories []models.Category `json:"categories"`
+type CategoryGroup map[uint8][]Category
+
+type Category struct {
+	ID   uint   `json:"id"`
+	Type uint8  `json:"type"`
+	Name string `json:"name"`
+	Sort uint8  `json:"sort"`
 }
