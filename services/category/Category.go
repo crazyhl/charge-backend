@@ -4,6 +4,7 @@ import (
 	"charge/container"
 	"charge/dto"
 	"charge/models"
+	"errors"
 )
 
 func ListGroup() dto.CategoryGroup {
@@ -29,6 +30,19 @@ func Add(_type uint8, name string, sort uint8) (*models.Category, error) {
 	category.Sort = sort
 	db := container.GetContainer().GetDb()
 	result := db.Create(category)
+
+	return category, result.Error
+}
+
+func Delete(id uint) (*models.Category, error) {
+	db := container.GetContainer().GetDb()
+	category := new(models.Category)
+	db.Where("id = ?", id).First(category)
+	if category.ID == 0 {
+		return nil, errors.New("删除对象不存在")
+	}
+
+	result := db.Delete(category)
 
 	return category, result.Error
 }

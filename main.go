@@ -58,6 +58,7 @@ func main() {
 	categoryGroup := app.Group("/category")
 	categoryGroup.Get("/list", category.List)
 	categoryGroup.Post("", category.Add)
+	categoryGroup.Delete("/:id", category.Delete)
 
 	err := app.Listen(viper.GetString("http-server.host") + ":" + viper.GetString("http-server.port"))
 	if err != nil {
