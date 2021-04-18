@@ -3,6 +3,7 @@ package category
 import (
 	"charge/container"
 	"charge/models"
+	accountService "charge/services/account"
 	"charge/services/category"
 	"charge/services/charge_detail"
 	"charge/utils"
@@ -128,23 +129,54 @@ func Add(ctx *fiber.Ctx) error {
 		})
 	}
 
-	money := detail.Money * 1000
+	money := int64(detail.Money * 1000)
 	transfer := 0
 	if *detail.Type == 4 {
 		transfer = 1
 	}
 
-	charge_detail.Add(
+	_, err := charge_detail.Add(
 		detail.AccountId,
 		*detail.Type,
 		detail.CategoryId,
-		int64(money),
+		money,
 		detail.Description,
 		detail.RepayAt,
 		detail.RepayAccountId,
 		uint8(transfer),
 		detail.TransferAccountId,
 	)
+
+	if err == nil {
+		// 改钱
+		if *detail.Type == uint8(2) && account.HasCredit == 0 {
+			return ctx.JSON(fiber.Map{
+				"status":  -7,
+				"message": "该账户不支持借款",
+			})
+		}
+
+		switch *detail.Type {
+		case 0:
+			// 收入
+			accountService.IncreaseCash(detail.AccountId, money)
+		case 1:
+			// 支出
+			accountService.DecreaseCash(detail.AccountId, money)
+		case 2:
+			// 借
+			accountService.DecreaseCredit(detail.AccountId, money)
+		case 3:
+			// 还
+			accountService.DecreaseCash(detail.AccountId, money)
+			accountService.IncreaseCredit(detail.RepayAccountId, money)
+		case 4:
+			// 转
+			accountService.DecreaseCash(detail.AccountId, money)
+			accountService.IncreaseCash(detail.TransferAccountId, money)
+
+		}
+	}
 
 	return ctx.JSON(fiber.Map{
 		"status":  0,
