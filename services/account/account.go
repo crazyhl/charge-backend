@@ -5,6 +5,7 @@ import (
 	"charge/dto"
 	"charge/models"
 	"errors"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -97,6 +98,41 @@ func Edit(id int, opts ...Options) (*models.Account, error) {
 	result := db.Save(account)
 
 	return account, result.Error
+}
+
+func IncreaseCash(accountId uint, money int64) error {
+	return changeMoney("cash", accountId, money, "+")
+}
+
+func IncreaseCredit(accountId uint, money int64) error {
+	return changeMoney("cash", accountId, money, "+")
+}
+
+func DecreaseCash(accountId uint, money int64) error {
+	return changeMoney("cash", accountId, money, "-")
+}
+
+func DecreaseCredit(accountId uint, money int64) error {
+	return changeMoney("cash", accountId, money, "-")
+}
+
+func changeMoney(fieldName string, accountId uint, money int64, operate string) error {
+	db := container.GetContainer().GetDb()
+
+	account := new(models.Account)
+	db.Where("id = ?", accountId).First(account)
+	if account.ID == 0 {
+		return errors.New("账户不存在")
+	}
+
+	result := db.Model(account).Updates(
+		map[string]interface{}{
+			fieldName:  gorm.Expr("Cash "+operate+" ?", money),
+			"ChangeAt": time.Now().Unix(),
+		},
+	)
+
+	return result.Error
 }
 
 // ------------ 上面各种方法用的 with 函数 -------------------
