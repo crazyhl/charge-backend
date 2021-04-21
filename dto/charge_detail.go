@@ -9,8 +9,8 @@ type ChargeDetail struct {
 	Category          Category      `json:"category"`
 	Money             float64       `json:"money"`
 	Description       string        `json:"description,omitempty"`
-	RepayDetailId     uint          `json:"repay_detail_id"`
-	ReplayDetail      ReplayDetail  `json:"replay_detail,omitempty"`
+	RepaidDetailId    uint          `json:"repaid_detail_id"`
+	RepaidDetail      RepaidDetail  `json:"repaid_detail,omitempty"`
 	RepayAccountId    uint          `json:"repay_account_id"`
 	RepayAccount      AccountDetail `json:"repay_account,omitempty"`
 	TransferAccountId uint          `json:"transfer_account_id"`
@@ -19,12 +19,8 @@ type ChargeDetail struct {
 	UpdateAt          string        `json:"update_at,omitempty"`
 }
 
-type ReplayDetail struct {
+type RepaidDetail struct {
 	ID          uint    `json:"id"`
-	AccountId   uint    `json:"account_id"`
-	Type        uint8   `json:"type"`
-	CategoryId  uint    `json:"category_id"`
-	Category    string  `json:"category,omitempty"`
 	Money       float64 `json:"money"`
 	Description string  `json:"description,omitempty"`
 	CreateAt    string  `json:"create_at,omitempty"`
@@ -39,5 +35,5 @@ type ChargeEditDetail struct {
 	Description       string         `json:"description"`
 	RepayAccountId    uint           `json:"repay_account_id"`
 	TransferAccountId uint           `json:"transfer_account_id"`
-	RepaidDetails     []ReplayDetail `json:"repaid_details"`
+	RepaidDetails     []RepaidDetail `json:"repaid_details"`
 }

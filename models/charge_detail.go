@@ -11,8 +11,8 @@ type ChargeDetail struct {
 	Money       int64    // 金额
 	Description string   `gorm:"default:''"` // 描述
 	// -------------- 下面两个是给借款 type 用的
-	RepayDetailId uint          `gorm:"index"` // 对应还款 明细 id
-	RepayDetail   *ChargeDetail // 还款详情
+	RepaidDetailId uint          `gorm:"index"` // 对应还款 明细 id
+	RepaidDetail   *ChargeDetail // 还款详情
 	// -------------- 下面两个是给 还款 type 用的
 	RepayAccountId uint    `gorm:"index"` // 还款账户id
 	RepayAccount   Account // orm 还款账户信息

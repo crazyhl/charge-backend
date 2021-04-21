@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm/clause"
+	"time"
 )
 
 func List(pageStart, pageSize int) []dto.ChargeDetail {
@@ -97,17 +98,19 @@ func EditDetail(id int) (*dto.ChargeEditDetail, error) {
 	detailDto.Description = detail.Description
 	detailDto.RepayAccountId = detail.RepayAccountId
 	detailDto.TransferAccountId = detail.TransferAccountId
-
+	if detail.Type == 3 {
+		detailDto.RepaidDetails = GetRepaidList(detail.ID)
+	}
 	return detailDto, nil
 }
 
-func GetUnPayList() []dto.ChargeDetail {
+func GetUnPaidList(accountId uint) []dto.ChargeDetail {
 	db := container.GetContainer().GetDb()
-	unpayDetailDtos := make([]dto.ChargeDetail, 0, 0)
+	unPaidDetailDtoList := make([]dto.ChargeDetail, 0, 0)
 	var unPayDetails []models.ChargeDetail
-	db.Where("repay = ?", 0).Preload(clause.Associations).Find(&unPayDetails)
+	db.Where("account_id = ?", accountId).Where("repaid_detail_id = ?", 0).Preload(clause.Associations).Find(&unPayDetails)
 	for _, detail := range unPayDetails {
-		unpayDetailDtos = append(unpayDetailDtos, dto.ChargeDetail{
+		unPaidDetailDtoList = append(unPaidDetailDtoList, dto.ChargeDetail{
 			ID:         detail.ID,
 			AccountId:  detail.AccountId,
 			Type:       detail.Type,
@@ -122,7 +125,7 @@ func GetUnPayList() []dto.ChargeDetail {
 		})
 	}
 
-	return unpayDetailDtos
+	return unPaidDetailDtoList
 }
 
 // Edit 编辑账单
@@ -147,24 +150,46 @@ func Edit(id uint, accountId uint, _type uint8, categoryId uint, money int64, de
 	return detail, result.Error
 }
 
+func GetRepaidList(id uint) []dto.RepaidDetail {
+	db := container.GetContainer().GetDb()
+	paidDtoList := make([]dto.RepaidDetail, 0, 0)
+	var list []models.ChargeDetail
+	db.Model(models.ChargeDetail{}).Where(
+		"id = ?",
+		id,
+	).Find(&list)
+
+	for _, detail := range list {
+		createTm := time.Unix(detail.CreateAt, 0)
+		paidDtoList = append(paidDtoList, dto.RepaidDetail{
+			ID:          detail.RepaidDetailId,
+			Money:       float64(detail.Money) / 1000.0,
+			Description: detail.Description,
+			CreateAt:    createTm.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return paidDtoList
+}
+
 // UpdateRepay 更新还款记录
-func UpdateRepay(repayId uint, chargeIdArr []int) {
+func UpdateRepay(repaidId uint, chargeIdArr []int) {
 	db := container.GetContainer().GetDb()
 	db.Model(models.ChargeDetail{}).Where(
 		"id in ?",
 		chargeIdArr,
 	).Updates(
-		models.ChargeDetail{RepayDetailId: repayId},
+		models.ChargeDetail{RepaidDetailId: repaidId},
 	)
 }
 
 // ClearRepay 清除借款的还款记录
-func ClearRepay(repayId uint) {
+func ClearRepay(id uint) {
 	db := container.GetContainer().GetDb()
 	db.Model(models.ChargeDetail{}).Where(
 		"repay_detail_id in ?",
-		repayId,
+		id,
 	).Updates(
-		models.ChargeDetail{RepayDetailId: repayId},
+		models.ChargeDetail{RepaidDetailId: 0},
 	)
 }

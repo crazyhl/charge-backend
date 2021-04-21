@@ -329,7 +329,8 @@ func Edit(ctx *fiber.Ctx) error {
 }
 
 func UnRepayList(ctx *fiber.Ctx) error {
-	unPayList := charge_detail.GetUnPayList()
+	accountId, _ := ctx.ParamsInt("accountId")
+	unPayList := charge_detail.GetUnPaidList(uint(accountId))
 
 	return ctx.JSON(fiber.Map{
 		"status": 0,
