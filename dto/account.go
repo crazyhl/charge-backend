@@ -1,7 +1,7 @@
 package dto
 
-// AccountListDetail 账户模型
-type AccountListDetail struct {
+// AccountDetail 账户模型
+type AccountDetail struct {
 	ID        uint    `json:"id"`
 	Name      string  `json:"name"`
 	HasCredit bool    `json:"has_credit"`

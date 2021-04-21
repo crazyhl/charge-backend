@@ -1,4 +1,4 @@
-package category
+package charge_detail
 
 import (
 	"charge/container"
@@ -17,11 +17,9 @@ type addDetail struct {
 	CategoryId        uint    `json:"category_id" form:"category_id" validate:"required,number"`
 	Money             float64 `json:"money" form:"money" validate:"required,number"`
 	Description       string  `json:"description" form:"description"`
-	Repay             bool    `json:"repay"  form:"description" validate:"required"`
 	RepayDetailIds    []uint  `json:"repay_detail_ids" form:"repay_detail_ids"`
 	RepayAccountId    uint    `json:"repay_account_id" form:"repay_account_id"`
 	TransferAccountId uint    `json:"transfer_account_id" form:"transfer_account_id"`
-	RepayAt           int64   `json:"repay_at" form:"repay_at"`
 }
 
 type editDetail struct {
@@ -31,12 +29,9 @@ type editDetail struct {
 	CategoryId        uint    `json:"category_id" form:"category_id" validate:"required,number"`
 	Money             float64 `json:"money" form:"money" validate:"required,number"`
 	Description       string  `json:"description" form:"description"`
-	Repay             bool    `json:"repay"  form:"description" validate:"required"`
 	RepayDetailIds    []uint  `json:"repay_detail_ids" form:"repay_detail_ids"`
 	RepayAccountId    uint    `json:"repay_account_id" form:"repay_account_id"`
-	Transfer          bool    `json:"transfer" form:"transfer"`
 	TransferAccountId uint    `json:"transfer_account_id" form:"transfer_account_id"`
-	RepayAt           int64   `json:"repay_at" form:"repay_at"`
 }
 
 //func List(ctx *fiber.Ctx) error {
@@ -130,10 +125,6 @@ func Add(ctx *fiber.Ctx) error {
 	}
 
 	money := int64(detail.Money * 1000)
-	transfer := 0
-	if *detail.Type == 4 {
-		transfer = 1
-	}
 
 	_, err := charge_detail.Add(
 		detail.AccountId,
@@ -141,9 +132,7 @@ func Add(ctx *fiber.Ctx) error {
 		detail.CategoryId,
 		money,
 		detail.Description,
-		detail.RepayAt,
 		detail.RepayAccountId,
-		uint8(transfer),
 		detail.TransferAccountId,
 	)
 
@@ -313,10 +302,6 @@ func Edit(ctx *fiber.Ctx) error {
 	}
 
 	money := detail.Money * 1000
-	transfer := 0
-	if *detail.Type == 4 {
-		transfer = 1
-	}
 
 	newAccount, err := charge_detail.Edit(
 		detail.Id,
@@ -325,9 +310,7 @@ func Edit(ctx *fiber.Ctx) error {
 		detail.CategoryId,
 		int64(money),
 		detail.Description,
-		detail.RepayAt,
 		detail.RepayAccountId,
-		uint8(transfer),
 		detail.TransferAccountId,
 	)
 
@@ -342,5 +325,14 @@ func Edit(ctx *fiber.Ctx) error {
 		"status":  0,
 		"data":    newAccount,
 		"message": "修改成功",
+	})
+}
+
+func UnRepayList(ctx *fiber.Ctx) error {
+	unPayList := charge_detail.GetUnPayList()
+
+	return ctx.JSON(fiber.Map{
+		"status": 0,
+		"data":   unPayList,
 	})
 }

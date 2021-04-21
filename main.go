@@ -4,6 +4,7 @@ import (
 	"charge/container"
 	"charge/controller/account"
 	"charge/controller/category"
+	"charge/controller/charge_detail"
 	"charge/initial"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
@@ -61,6 +62,9 @@ func main() {
 	categoryGroup.Delete("/:id", category.Delete)
 	categoryGroup.Get("/:id/edit", category.EditDetail)
 	categoryGroup.Put("/:id", category.Edit)
+
+	chargeDetailGroup := app.Group("/chargeDetail")
+	chargeDetailGroup.Get("/unPayList", charge_detail.UnRepayList)
 
 	err := app.Listen(viper.GetString("http-server.host") + ":" + viper.GetString("http-server.port"))
 	if err != nil {

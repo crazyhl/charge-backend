@@ -25,7 +25,7 @@ func List(pageStart, pageSize int) []dto.ChargeDetail {
 	//	details = append(details, dto.ChargeDetail{
 	//		ID:        detail.ID,
 	//		AccountId: detail.AccountId,
-	//		Account: dto.AccountListDetail{
+	//		Account: dto.AccountDetail{
 	//			ID:        detail.Account.ID,
 	//			Name:      detail.Account.Name,
 	//			HasCredit: detail.Account.HasCredit == 1,
@@ -51,16 +51,14 @@ func List(pageStart, pageSize int) []dto.ChargeDetail {
 	return details
 }
 
-func Add(accountId uint, _type uint8, categoryId uint, money int64, description string, repayAt int64, repayAccountId uint, transfer uint8, transferAccountId uint) (*models.ChargeDetail, error) {
+func Add(accountId uint, _type uint8, categoryId uint, money int64, description string, repayAccountId uint, transferAccountId uint) (*models.ChargeDetail, error) {
 	detail := new(models.ChargeDetail)
 	detail.AccountId = accountId
 	detail.Type = _type
 	detail.CategoryId = categoryId
 	detail.Money = money
 	detail.Description = description
-	detail.RepayAt = repayAt
 	detail.RepayAccountId = repayAccountId
-	detail.Transfer = transfer
 	detail.TransferAccountId = transferAccountId
 	db := container.GetContainer().GetDb()
 	result := db.Create(detail)
@@ -97,10 +95,7 @@ func EditDetail(id int) (*dto.ChargeEditDetail, error) {
 	detailDto.CategoryId = detail.CategoryId
 	detailDto.Money = float64(detail.Money) / 1000.0
 	detailDto.Description = detail.Description
-	detailDto.Repay = detail.Repay == 1
-	detailDto.RepayDetailId = detail.RepayDetailId
-	detailDto.RepayAt = detail.RepayAt
-	detailDto.Transfer = detail.Transfer == 1
+	detailDto.RepayAccountId = detail.RepayAccountId
 	detailDto.TransferAccountId = detail.TransferAccountId
 
 	return detailDto, nil
@@ -131,7 +126,7 @@ func GetUnPayList() []dto.ChargeDetail {
 }
 
 // Edit 编辑账单
-func Edit(id uint, accountId uint, _type uint8, categoryId uint, money int64, description string, repayAt int64, repayAccountId uint, transfer uint8, transferAccountId uint) (*models.ChargeDetail, error) {
+func Edit(id uint, accountId uint, _type uint8, categoryId uint, money int64, description string, repayAccountId uint, transferAccountId uint) (*models.ChargeDetail, error) {
 	db := container.GetContainer().GetDb()
 	detail := new(models.ChargeDetail)
 	db.Where("id = ?", id).First(detail)
@@ -144,10 +139,7 @@ func Edit(id uint, accountId uint, _type uint8, categoryId uint, money int64, de
 	detail.CategoryId = categoryId
 	detail.Money = money
 	detail.Description = description
-	detail.RepayDetailId = repayAccountId
-	detail.RepayAt = repayAt
 	detail.RepayAccountId = repayAccountId
-	detail.Transfer = transfer
 	detail.TransferAccountId = transferAccountId
 
 	result := db.Save(detail)
@@ -156,12 +148,23 @@ func Edit(id uint, accountId uint, _type uint8, categoryId uint, money int64, de
 }
 
 // UpdateRepay 更新还款记录
-func UpdateRepay(repayId uint, repayTime int64, chargeIdArr []int) {
+func UpdateRepay(repayId uint, chargeIdArr []int) {
 	db := container.GetContainer().GetDb()
 	db.Model(models.ChargeDetail{}).Where(
 		"id in ?",
 		chargeIdArr,
 	).Updates(
-		models.ChargeDetail{RepayDetailId: repayId, RepayAt: repayTime},
+		models.ChargeDetail{RepayDetailId: repayId},
+	)
+}
+
+// ClearRepay 清除借款的还款记录
+func ClearRepay(repayId uint) {
+	db := container.GetContainer().GetDb()
+	db.Model(models.ChargeDetail{}).Where(
+		"repay_detail_id in ?",
+		repayId,
+	).Updates(
+		models.ChargeDetail{RepayDetailId: repayId},
 	)
 }

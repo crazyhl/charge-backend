@@ -26,7 +26,7 @@ type editAccount struct {
 }
 
 func List(ctx *fiber.Ctx) error {
-	var accounts []dto.AccountListDetail
+	var accounts []dto.AccountDetail
 	accounts = account.List()
 	return ctx.JSON(fiber.Map{
 		"status": 0,
