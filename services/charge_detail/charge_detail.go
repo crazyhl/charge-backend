@@ -25,7 +25,7 @@ func List(pageStart, pageSize int) []dto.ChargeDetail {
 	//	details = append(details, dto.ChargeDetail{
 	//		ID:        detail.ID,
 	//		AccountId: detail.AccountId,
-	//		Account: dto.AccountList{
+	//		Account: dto.AccountListDetail{
 	//			ID:        detail.Account.ID,
 	//			Name:      detail.Account.Name,
 	//			HasCredit: detail.Account.HasCredit == 1,

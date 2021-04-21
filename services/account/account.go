@@ -10,8 +10,8 @@ import (
 )
 
 // List 账户列表，会返回所有的账户
-func List() []dto.AccountList {
-	var accounts []dto.AccountList
+func List() []dto.AccountListDetail {
+	var accounts []dto.AccountListDetail
 	var accountRows []models.Account
 	db := container.GetContainer().GetDb()
 	db.Order("sort DESC").Find(&accountRows)
@@ -20,7 +20,7 @@ func List() []dto.AccountList {
 		createTm := time.Unix(acc.CreateAt, 0)
 		updateTm := time.Unix(acc.UpdateAt, 0)
 		changeTm := time.Unix(acc.ChangeAt, 0)
-		accounts = append(accounts, dto.AccountList{
+		accounts = append(accounts, dto.AccountListDetail{
 			ID:        acc.ID,
 			Name:      acc.Name,
 			HasCredit: acc.HasCredit == 1,
