@@ -64,7 +64,7 @@ func main() {
 	categoryGroup.Put("/:id", category.Edit)
 
 	chargeDetailGroup := app.Group("/chargeDetail")
-	chargeDetailGroup.Get("/unPayList/:accountId", charge_detail.UnRepayList)
+	chargeDetailGroup.Get("/unRepayList/:accountId", charge_detail.UnRepayList)
 
 	err := app.Listen(viper.GetString("http-server.host") + ":" + viper.GetString("http-server.port"))
 	if err != nil {

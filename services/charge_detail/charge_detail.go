@@ -111,10 +111,9 @@ func GetUnPaidList(accountId uint) []dto.ChargeDetail {
 	db.Where("account_id = ?", accountId).Where("repaid_detail_id = ?", 0).Preload(clause.Associations).Find(&unPayDetails)
 	for _, detail := range unPayDetails {
 		unPaidDetailDtoList = append(unPaidDetailDtoList, dto.ChargeDetail{
-			ID:         detail.ID,
-			AccountId:  detail.AccountId,
-			Type:       detail.Type,
-			CategoryId: detail.CategoryId,
+			ID:        detail.ID,
+			AccountId: detail.AccountId,
+			Type:      detail.Type,
 			Category: dto.Category{
 				ID:   detail.Category.ID,
 				Type: detail.Category.Type,
