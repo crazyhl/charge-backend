@@ -14,7 +14,7 @@ import (
 type addDetail struct {
 	AccountId         uint    `json:"account_id" form:"account_id" validate:"required,number"`
 	Type              *uint8  `json:"type" form:"type"  validate:"required,number,gte=0,lte=4"`
-	CategoryId        uint    `json:"category_id" form:"category_id" validate:"required,number"`
+	CategoryId        uint    `json:"category_id" form:"category_id" validate:"number,gte=0"`
 	Money             float64 `json:"money" form:"money" validate:"required,number"`
 	Description       string  `json:"description" form:"description"`
 	RepayDetailIds    []uint  `json:"repay_detail_ids" form:"repay_detail_ids"`
@@ -26,7 +26,7 @@ type editDetail struct {
 	Id                uint    `json:"id" form:"id" validate:"required"  validate:"required"`
 	AccountId         uint    `json:"account_id" form:"account_id" validate:"required,number"`
 	Type              *uint8  `json:"type" form:"type"  validate:"required,number,gte=0,lte=4"`
-	CategoryId        uint    `json:"category_id" form:"category_id" validate:"required,number"`
+	CategoryId        uint    `json:"category_id" form:"category_id" validate:"number,gte=0"`
 	Money             float64 `json:"money" form:"money" validate:"required,number"`
 	Description       string  `json:"description" form:"description"`
 	RepayDetailIds    []uint  `json:"repay_detail_ids" form:"repay_detail_ids"`
@@ -107,7 +107,7 @@ func Add(ctx *fiber.Ctx) error {
 
 	if *detail.Type == uint8(4) {
 		transferAccount := new(models.Account)
-		db.Where("id =?", detail.RepayAccountId).First(transferAccount)
+		db.Where("id =?", detail.TransferAccountId).First(transferAccount)
 		if transferAccount.ID == 0 {
 			return ctx.JSON(fiber.Map{
 				"status":  -8,
@@ -115,13 +115,16 @@ func Add(ctx *fiber.Ctx) error {
 			})
 		}
 	}
-	cate := new(models.Category)
-	db.Where("id =?", detail.CategoryId).Where("type =?", detail.Type).First(cate)
-	if cate.ID == 0 {
-		return ctx.JSON(fiber.Map{
-			"status":  -8,
-			"message": "所选分类不存在",
-		})
+
+	if detail.CategoryId > 0 {
+		cate := new(models.Category)
+		db.Where("id =?", detail.CategoryId).Where("type =?", detail.Type).First(cate)
+		if cate.ID == 0 {
+			return ctx.JSON(fiber.Map{
+				"status":  -8,
+				"message": "所选分类不存在",
+			})
+		}
 	}
 
 	money := int64(detail.Money * 1000)
@@ -294,13 +297,15 @@ func Edit(ctx *fiber.Ctx) error {
 			})
 		}
 	}
-	cate := new(models.Category)
-	db.Where("id =?", detail.CategoryId).Where("type =?", detail.Type).First(cate)
-	if cate.ID == 0 {
-		return ctx.JSON(fiber.Map{
-			"status":  -8,
-			"message": "所选分类不存在",
-		})
+	if detail.CategoryId > 0 {
+		cate := new(models.Category)
+		db.Where("id =?", detail.CategoryId).Where("type =?", detail.Type).First(cate)
+		if cate.ID == 0 {
+			return ctx.JSON(fiber.Map{
+				"status":  -8,
+				"message": "所选分类不存在",
+			})
+		}
 	}
 
 	money := detail.Money * 1000
