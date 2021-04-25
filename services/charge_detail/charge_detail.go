@@ -110,6 +110,7 @@ func GetUnPaidList(accountId uint) []dto.ChargeDetail {
 	var unPayDetails []models.ChargeDetail
 	db.Where("account_id = ?", accountId).Where("repaid_detail_id = ?", 0).Preload(clause.Associations).Find(&unPayDetails)
 	for _, detail := range unPayDetails {
+		createTm := time.Unix(detail.CreateAt, 0)
 		unPaidDetailDtoList = append(unPaidDetailDtoList, dto.ChargeDetail{
 			ID:        detail.ID,
 			AccountId: detail.AccountId,
@@ -121,6 +122,7 @@ func GetUnPaidList(accountId uint) []dto.ChargeDetail {
 			},
 			Money:       float64(detail.Money) / 1000.0,
 			Description: detail.Description,
+			CreateAt:    createTm.Format("2006-01-02 15:04:05"),
 		})
 	}
 
@@ -172,7 +174,7 @@ func GetRepaidList(id uint) []dto.RepaidDetail {
 }
 
 // UpdateRepay 更新还款记录
-func UpdateRepay(repaidId uint, chargeIdArr []int) {
+func UpdateRepay(repaidId uint, chargeIdArr []uint) {
 	db := container.GetContainer().GetDb()
 	db.Model(models.ChargeDetail{}).Where(
 		"id in ?",

@@ -126,7 +126,7 @@ func Add(ctx *fiber.Ctx) error {
 
 	money := int64(detail.Money * 1000)
 
-	_, err := charge_detail.Add(
+	chargeDetail, err := charge_detail.Add(
 		detail.AccountId,
 		*detail.Type,
 		detail.CategoryId,
@@ -159,6 +159,8 @@ func Add(ctx *fiber.Ctx) error {
 			// 还
 			accountService.DecreaseCash(detail.AccountId, money)
 			accountService.IncreaseCredit(detail.RepayAccountId, money)
+			// 更新借款账目的还款id
+			charge_detail.UpdateRepay(chargeDetail.ID, detail.RepayDetailIds)
 		case 4:
 			// 转
 			accountService.DecreaseCash(detail.AccountId, money)

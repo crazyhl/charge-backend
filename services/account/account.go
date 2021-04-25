@@ -105,7 +105,7 @@ func IncreaseCash(accountId uint, money int64) error {
 }
 
 func IncreaseCredit(accountId uint, money int64) error {
-	return changeMoney("cash", accountId, money, "+")
+	return changeMoney("credit", accountId, money, "+")
 }
 
 func DecreaseCash(accountId uint, money int64) error {
@@ -113,7 +113,7 @@ func DecreaseCash(accountId uint, money int64) error {
 }
 
 func DecreaseCredit(accountId uint, money int64) error {
-	return changeMoney("cash", accountId, money, "-")
+	return changeMoney("credit", accountId, money, "-")
 }
 
 func changeMoney(fieldName string, accountId uint, money int64, operate string) error {
@@ -127,7 +127,7 @@ func changeMoney(fieldName string, accountId uint, money int64, operate string) 
 
 	result := db.Model(account).Updates(
 		map[string]interface{}{
-			fieldName:  gorm.Expr("Cash "+operate+" ?", money),
+			fieldName:  gorm.Expr(fieldName+" "+operate+" ?", money),
 			"ChangeAt": time.Now().Unix(),
 		},
 	)
