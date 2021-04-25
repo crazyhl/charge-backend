@@ -16,10 +16,15 @@ type ChargeDetail struct {
 }
 
 type RepaidDetail struct {
-	ID          uint    `json:"id"`
-	Money       float64 `json:"money"`
-	Description string  `json:"description,omitempty"`
-	CreateAt    string  `json:"create_at,omitempty"`
+	ID          uint     `json:"id"`
+	Money       float64  `json:"money"`
+	Category    Category `json:"category"`
+	Description string   `json:"description,omitempty"`
+	CreateAt    string   `json:"create_at,omitempty"`
+}
+
+type UnpaidDetail struct {
+	RepaidDetail
 }
 
 type ChargeEditDetail struct {

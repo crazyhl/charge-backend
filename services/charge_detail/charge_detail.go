@@ -104,26 +104,27 @@ func EditDetail(id int) (*dto.ChargeEditDetail, error) {
 	return detailDto, nil
 }
 
-func GetUnPaidList(accountId uint) []dto.ChargeDetail {
+func GetUnPaidList(accountId uint) []dto.UnpaidDetail {
 	db := container.GetContainer().GetDb()
-	unPaidDetailDtoList := make([]dto.ChargeDetail, 0, 0)
+	unPaidDetailDtoList := make([]dto.UnpaidDetail, 0, 0)
 	var unPayDetails []models.ChargeDetail
-	db.Where("account_id = ?", accountId).Where("repaid_detail_id = ?", 0).Preload(clause.Associations).Find(&unPayDetails)
+	db.Where("account_id = ?", accountId).
+		Where("type = ?", 2).
+		Where("repaid_detail_id = ?", 0).
+		Preload(clause.Associations).Find(&unPayDetails)
 	for _, detail := range unPayDetails {
 		createTm := time.Unix(detail.CreateAt, 0)
-		unPaidDetailDtoList = append(unPaidDetailDtoList, dto.ChargeDetail{
-			ID:        detail.ID,
-			AccountId: detail.AccountId,
-			Type:      detail.Type,
-			Category: dto.Category{
-				ID:   detail.Category.ID,
-				Type: detail.Category.Type,
-				Name: detail.Category.Name,
-			},
-			Money:       float64(detail.Money) / 1000.0,
-			Description: detail.Description,
-			CreateAt:    createTm.Format("2006-01-02 15:04:05"),
-		})
+		unpaidDetail := new(dto.UnpaidDetail)
+		unpaidDetail.ID = detail.ID
+		unpaidDetail.Category = dto.Category{
+			ID:   detail.Category.ID,
+			Type: detail.Category.Type,
+			Name: detail.Category.Name,
+		}
+		unpaidDetail.Money = float64(detail.Money) / 1000.0
+		unpaidDetail.Description = detail.Description
+		unpaidDetail.CreateAt = createTm.Format("2006-01-02 15:04:05")
+		unPaidDetailDtoList = append(unPaidDetailDtoList, *unpaidDetail)
 	}
 
 	return unPaidDetailDtoList
@@ -163,8 +164,13 @@ func GetRepaidList(id uint) []dto.RepaidDetail {
 	for _, detail := range list {
 		createTm := time.Unix(detail.CreateAt, 0)
 		paidDtoList = append(paidDtoList, dto.RepaidDetail{
-			ID:          detail.RepaidDetailId,
-			Money:       float64(detail.Money) / 1000.0,
+			ID:    detail.RepaidDetailId,
+			Money: float64(detail.Money) / 1000.0,
+			Category: dto.Category{
+				ID:   detail.Category.ID,
+				Type: detail.Category.Type,
+				Name: detail.Category.Name,
+			},
 			Description: detail.Description,
 			CreateAt:    createTm.Format("2006-01-02 15:04:05"),
 		})
