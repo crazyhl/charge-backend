@@ -14,11 +14,11 @@ type ChargeDetail struct {
 	RepaidDetailId uint          `gorm:"index"` // 对应还款 明细 id
 	RepaidDetail   *ChargeDetail // 还款详情
 	// -------------- 下面两个是给 还款 type 用的
-	RepayAccountId uint    `gorm:"index"` // 还款账户id
-	RepayAccount   Account // orm 还款账户信息
+	RepayAccountId uint     `gorm:"index"` // 还款账户id
+	RepayAccount   *Account // orm 还款账户信息
 	// ------------- 下面两个是给转账 type 用的
-	TransferAccountId uint    `gorm:"index"` // 转账 账户id
-	TransferAccount   Account // orm 的账户信息
-	CreateAt          int64   `gorm:"autoCreateTime;default:0;not null"`
-	UpdateAt          int64   `gorm:"autoUpdateTime;default:0;not null"`
+	TransferAccountId uint     `gorm:"index"` // 转账 账户id
+	TransferAccount   *Account // orm 的账户信息
+	CreateAt          int64    `gorm:"autoCreateTime;default:0;not null"`
+	UpdateAt          int64    `gorm:"autoUpdateTime;default:0;not null"`
 }

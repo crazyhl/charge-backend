@@ -5,51 +5,78 @@ import (
 	"charge/dto"
 	"charge/models"
 	"errors"
-	"fmt"
 	"gorm.io/gorm/clause"
 	"time"
 )
 
-func List(pageStart, pageSize int) []dto.ChargeDetail {
+func List(pageStart, pageSize int) dto.ListData {
+	var listData dto.ListData
 	var details []dto.ChargeDetail
 	var detailRows []models.ChargeDetail
+	var totalCount int64
 	db := container.GetContainer().GetDb()
-	db.Order("id DESC").Limit(pageStart).Offset(pageSize).Preload(clause.Associations).Find(&detailRows)
-	fmt.Println(detailRows)
-	//for _, detail := range detailRows {
-	//	createTm := time.Unix(detail.CreateAt, 0)
-	//	updateTm := time.Unix(detail.UpdateAt, 0)
-	//	repayTm := time.Unix(detail.RepayAt, 0)
-	//
-	//	repayDetail := nil
-	//
-	//	details = append(details, dto.ChargeDetail{
-	//		ID:        detail.ID,
-	//		AccountId: detail.AccountId,
-	//		Account: dto.AccountDetail{
-	//			ID:        detail.Account.ID,
-	//			Name:      detail.Account.Name,
-	//			HasCredit: detail.Account.HasCredit == 1,
-	//			Cash:      float64(detail.Account.Cash) / 1000.0,
-	//			Credit:    float64(detail.Account.Cash) / 1000.0,
-	//		},
-	//		Type:      detail.Type,
-	//		CategoryId: detail.CategoryId,
-	//		Category:    dto.Category{
-	//			ID:   detail.Category.ID,
-	//			Type: detail.Category.Type,
-	//			Name: detail.Category.Name,
-	//		},
-	//		Money:      float64(detail.Money) / 1000.0,
-	//		Description:    detail.Description,
-	//		Repay:      detail.Repay == 1,
-	//		ReplayDetail: repayDetail,
-	//		CreateAt:  createTm.Format("2006-01-02 15:04:05"),
-	//		UpdateAt:  updateTm.Format("2006-01-02 15:04:05"),
-	//		RepayAt:  repayTm.Format("2006-01-02 15:04:05"),
-	//	})
-	//}
-	return details
+	db.Limit(pageSize).Offset(pageStart).Order("id DESC").Preload(clause.Associations).Find(&detailRows)
+	db.Model(&models.ChargeDetail{}).Count(&totalCount)
+	for _, detail := range detailRows {
+		createTm := time.Unix(detail.CreateAt, 0)
+		updateTm := time.Unix(detail.UpdateAt, 0)
+		var repaidDetail dto.RepaidDetail
+		if detail.RepaidDetail != nil {
+			repaidDetailCreateTm := time.Unix(detail.RepaidDetail.CreateAt, 0)
+			repaidDetail = dto.RepaidDetail{
+				ID:       detail.RepaidDetail.RepaidDetailId,
+				CreateAt: repaidDetailCreateTm.Format("2006-01-02 15:04:05"),
+			}
+		}
+		var repayAccount dto.AccountDetail
+		if detail.RepayAccount != nil {
+			repayAccount = dto.AccountDetail{
+				ID:        detail.RepayAccount.ID,
+				Name:      detail.RepayAccount.Name,
+				HasCredit: detail.RepayAccount.HasCredit == 1,
+				Cash:      float64(detail.RepayAccount.Cash) / 1000.0,
+				Credit:    float64(detail.RepayAccount.Credit) / 1000.0,
+			}
+		}
+		var transferAccount dto.AccountDetail
+		if detail.TransferAccount != nil {
+			transferAccount = dto.AccountDetail{
+				ID:        detail.TransferAccount.ID,
+				Name:      detail.TransferAccount.Name,
+				HasCredit: detail.TransferAccount.HasCredit == 1,
+				Cash:      float64(detail.TransferAccount.Cash) / 1000.0,
+				Credit:    float64(detail.TransferAccount.Credit) / 1000.0,
+			}
+		}
+
+		details = append(details, dto.ChargeDetail{
+			ID:        detail.ID,
+			AccountId: detail.AccountId,
+			Account: dto.AccountDetail{
+				ID:        detail.Account.ID,
+				Name:      detail.Account.Name,
+				HasCredit: detail.Account.HasCredit == 1,
+				Cash:      float64(detail.Account.Cash) / 1000.0,
+				Credit:    float64(detail.Account.Credit) / 1000.0,
+			},
+			Type: detail.Type,
+			Category: dto.Category{
+				ID:   detail.Category.ID,
+				Type: detail.Category.Type,
+				Name: detail.Category.Name,
+			},
+			Money:           float64(detail.Money) / 1000.0,
+			Description:     detail.Description,
+			RepaidDetail:    repaidDetail,
+			RepayAccount:    repayAccount,
+			TransferAccount: transferAccount,
+			CreateAt:        createTm.Format("2006-01-02 15:04:05"),
+			UpdateAt:        updateTm.Format("2006-01-02 15:04:05"),
+		})
+	}
+	listData.Total = totalCount
+	listData.Data = details
+	return listData
 }
 
 func Add(accountId uint, _type uint8, categoryId uint, money int64, description string, repayAccountId uint, transferAccountId uint) (*models.ChargeDetail, error) {

@@ -9,6 +9,7 @@ import (
 	"charge/utils"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"strconv"
 )
 
 type addDetail struct {
@@ -34,13 +35,26 @@ type editDetail struct {
 	TransferAccountId uint    `json:"transfer_account_id" form:"transfer_account_id"`
 }
 
-//func List(ctx *fiber.Ctx) error {
-//	listGroup := charge_detail.List()
-//	return ctx.JSON(fiber.Map{
-//		"status": 0,
-//		"data":   listGroup,
-//	})
-//}
+func List(ctx *fiber.Ctx) error {
+	page := ctx.Query("page", "1")
+	size := ctx.Query("pageSize", "20")
+
+	pageInt, _ := strconv.Atoi(page)
+	pageSizeInt, _ := strconv.Atoi(size)
+	if pageSizeInt <= 0 {
+		pageSizeInt = 20
+	}
+	if pageInt < 1 {
+		pageInt = 1
+	}
+	pageStart := (pageInt - 1) * pageSizeInt
+	listData := charge_detail.List(pageStart, pageSizeInt)
+
+	return ctx.JSON(fiber.Map{
+		"status": 0,
+		"data":   listData,
+	})
+}
 
 func Add(ctx *fiber.Ctx) error {
 	db := container.GetContainer().GetDb()
