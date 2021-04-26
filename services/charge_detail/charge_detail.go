@@ -5,6 +5,7 @@ import (
 	"charge/dto"
 	"charge/models"
 	"errors"
+	"fmt"
 	"gorm.io/gorm/clause"
 	"time"
 )
@@ -20,36 +21,8 @@ func List(pageStart, pageSize int) dto.ListData {
 	for _, detail := range detailRows {
 		createTm := time.Unix(detail.CreateAt, 0)
 		updateTm := time.Unix(detail.UpdateAt, 0)
-		var repaidDetail dto.RepaidDetail
-		if detail.RepaidDetail != nil {
-			repaidDetailCreateTm := time.Unix(detail.RepaidDetail.CreateAt, 0)
-			repaidDetail = dto.RepaidDetail{
-				ID:       detail.RepaidDetail.RepaidDetailId,
-				CreateAt: repaidDetailCreateTm.Format("2006-01-02 15:04:05"),
-			}
-		}
-		var repayAccount dto.AccountDetail
-		if detail.RepayAccount != nil {
-			repayAccount = dto.AccountDetail{
-				ID:        detail.RepayAccount.ID,
-				Name:      detail.RepayAccount.Name,
-				HasCredit: detail.RepayAccount.HasCredit == 1,
-				Cash:      float64(detail.RepayAccount.Cash) / 1000.0,
-				Credit:    float64(detail.RepayAccount.Credit) / 1000.0,
-			}
-		}
-		var transferAccount dto.AccountDetail
-		if detail.TransferAccount != nil {
-			transferAccount = dto.AccountDetail{
-				ID:        detail.TransferAccount.ID,
-				Name:      detail.TransferAccount.Name,
-				HasCredit: detail.TransferAccount.HasCredit == 1,
-				Cash:      float64(detail.TransferAccount.Cash) / 1000.0,
-				Credit:    float64(detail.TransferAccount.Credit) / 1000.0,
-			}
-		}
 
-		details = append(details, dto.ChargeDetail{
+		chargeDetailDto := dto.ChargeDetail{
 			ID:        detail.ID,
 			AccountId: detail.AccountId,
 			Account: dto.AccountDetail{
@@ -65,14 +38,39 @@ func List(pageStart, pageSize int) dto.ListData {
 				Type: detail.Category.Type,
 				Name: detail.Category.Name,
 			},
-			Money:           float64(detail.Money) / 1000.0,
-			Description:     detail.Description,
-			RepaidDetail:    repaidDetail,
-			RepayAccount:    repayAccount,
-			TransferAccount: transferAccount,
-			CreateAt:        createTm.Format("2006-01-02 15:04:05"),
-			UpdateAt:        updateTm.Format("2006-01-02 15:04:05"),
-		})
+			Money:       float64(detail.Money) / 1000.0,
+			Description: detail.Description,
+			CreateAt:    createTm.Format("2006-01-02 15:04:05"),
+			UpdateAt:    updateTm.Format("2006-01-02 15:04:05"),
+		}
+
+		if detail.RepaidDetailId != 0 {
+			repaidDetailCreateTm := time.Unix(detail.RepaidDetail.CreateAt, 0)
+			chargeDetailDto.RepaidDetail = &dto.RepaidDetail{
+				ID:       detail.RepaidDetail.RepaidDetailId,
+				CreateAt: repaidDetailCreateTm.Format("2006-01-02 15:04:05"),
+			}
+		}
+		if detail.RepayAccountId != 0 {
+			chargeDetailDto.RepayAccount = &dto.AccountDetail{
+				ID:        detail.RepayAccount.ID,
+				Name:      detail.RepayAccount.Name,
+				HasCredit: detail.RepayAccount.HasCredit == 1,
+				Cash:      float64(detail.RepayAccount.Cash) / 1000.0,
+				Credit:    float64(detail.RepayAccount.Credit) / 1000.0,
+			}
+		}
+		if detail.TransferAccountId != 0 {
+			chargeDetailDto.TransferAccount = &dto.AccountDetail{
+				ID:        detail.TransferAccount.ID,
+				Name:      detail.TransferAccount.Name,
+				HasCredit: detail.TransferAccount.HasCredit == 1,
+				Cash:      float64(detail.TransferAccount.Cash) / 1000.0,
+				Credit:    float64(detail.TransferAccount.Credit) / 1000.0,
+			}
+		}
+		fmt.Println("chargeDetailDto", chargeDetailDto)
+		details = append(details, chargeDetailDto)
 	}
 	listData.Total = totalCount
 	listData.Data = details
