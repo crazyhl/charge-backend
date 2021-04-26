@@ -5,7 +5,6 @@ import (
 	"charge/dto"
 	"charge/models"
 	"errors"
-	"fmt"
 	"gorm.io/gorm/clause"
 	"time"
 )
@@ -32,16 +31,19 @@ func List(pageStart, pageSize int) dto.ListData {
 				Cash:      float64(detail.Account.Cash) / 1000.0,
 				Credit:    float64(detail.Account.Credit) / 1000.0,
 			},
-			Type: detail.Type,
-			Category: dto.Category{
-				ID:   detail.Category.ID,
-				Type: detail.Category.Type,
-				Name: detail.Category.Name,
-			},
+			Type:        detail.Type,
 			Money:       float64(detail.Money) / 1000.0,
 			Description: detail.Description,
 			CreateAt:    createTm.Format("2006-01-02 15:04:05"),
 			UpdateAt:    updateTm.Format("2006-01-02 15:04:05"),
+		}
+
+		if detail.CategoryId != 0 {
+			chargeDetailDto.Category = &dto.Category{
+				ID:   detail.Category.ID,
+				Type: detail.Category.Type,
+				Name: detail.Category.Name,
+			}
 		}
 
 		if detail.RepaidDetailId != 0 {
@@ -69,7 +71,6 @@ func List(pageStart, pageSize int) dto.ListData {
 				Credit:    float64(detail.TransferAccount.Credit) / 1000.0,
 			}
 		}
-		fmt.Println("chargeDetailDto", chargeDetailDto)
 		details = append(details, chargeDetailDto)
 	}
 	listData.Total = totalCount
@@ -141,7 +142,7 @@ func GetUnPaidList(accountId uint) []dto.UnpaidDetail {
 		createTm := time.Unix(detail.CreateAt, 0)
 		unpaidDetail := new(dto.UnpaidDetail)
 		unpaidDetail.ID = detail.ID
-		unpaidDetail.Category = dto.Category{
+		unpaidDetail.Category = &dto.Category{
 			ID:   detail.Category.ID,
 			Type: detail.Category.Type,
 			Name: detail.Category.Name,
@@ -191,7 +192,7 @@ func GetRepaidList(id uint) []dto.RepaidDetail {
 		paidDtoList = append(paidDtoList, dto.RepaidDetail{
 			ID:    detail.RepaidDetailId,
 			Money: float64(detail.Money) / 1000.0,
-			Category: dto.Category{
+			Category: &dto.Category{
 				ID:   detail.Category.ID,
 				Type: detail.Category.Type,
 				Name: detail.Category.Name,

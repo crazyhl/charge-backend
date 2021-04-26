@@ -19,6 +19,6 @@ type ChargeDetail struct {
 	// ------------- 下面两个是给转账 type 用的
 	TransferAccountId uint     `gorm:"index"` // 转账 账户id
 	TransferAccount   *Account // orm 的账户信息
-	CreateAt          int64    `gorm:"autoCreateTime;default:0;not null"`
-	UpdateAt          int64    `gorm:"autoUpdateTime;default:0;not null"`
+	CreateAt          int64    `gorm:"autoCreateTime"`
+	UpdateAt          int64    `gorm:"autoUpdateTime"`
 }

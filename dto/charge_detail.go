@@ -5,7 +5,7 @@ type ChargeDetail struct {
 	AccountId       uint           `json:"account_id"`
 	Account         AccountDetail  `json:"account,omitempty"`
 	Type            uint8          `json:"type"`
-	Category        Category       `json:"category"`
+	Category        *Category      `json:"category,omitempty"`
 	Money           float64        `json:"money"`
 	Description     string         `json:"description,omitempty"`
 	RepaidDetail    *RepaidDetail  `json:"repaid_detail,omitempty"`
@@ -16,11 +16,11 @@ type ChargeDetail struct {
 }
 
 type RepaidDetail struct {
-	ID          uint     `json:"id"`
-	Money       float64  `json:"money,omitempty"`
-	Category    Category `json:"category,omitempty"`
-	Description string   `json:"description,omitempty"`
-	CreateAt    string   `json:"create_at,omitempty"`
+	ID          uint      `json:"id"`
+	Money       float64   `json:"money,omitempty"`
+	Category    *Category `json:"category,omitempty"`
+	Description string    `json:"description,omitempty"`
+	CreateAt    string    `json:"create_at,omitempty"`
 }
 
 type UnpaidDetail struct {
