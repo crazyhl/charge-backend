@@ -5,6 +5,7 @@ import (
 	"charge/dto"
 	"charge/models"
 	"errors"
+	"github.com/jinzhu/now"
 	"gorm.io/gorm"
 	"time"
 )
@@ -133,6 +134,176 @@ func changeMoney(fieldName string, accountId uint, money int64, operate string) 
 	)
 
 	return result.Error
+}
+
+func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
+	db := container.GetContainer().GetDb()
+	location, _ := time.LoadLocation("Asia/Shanghai")
+
+	myConfig := &now.Config{
+		TimeLocation: location,
+	}
+
+	beginningOfMonth := myConfig.With(summaryTime).BeginningOfMonth()
+	endOfMonth := myConfig.With(summaryTime).EndOfMonth()
+
+	// 根据不同字段进行统计
+	switch fieldName {
+	case "cashIn":
+		result := make(map[string]interface{})
+		var totalMoney int64
+		db.Model(&models.ChargeDetail{}).
+			Select("sum(money) as money").
+			Where("account_id = ?", accountId).
+			Where("type in ?", []int{0}).
+			Where("create_at >= ?", beginningOfMonth.Unix()).
+			Where("create_at <= ?", endOfMonth.Unix()).
+			First(&result)
+		if result["money"] != nil {
+			totalMoney = totalMoney + result["money"].(int64)
+		}
+		db.Model(&models.ChargeDetail{}).
+			Select("sum(money) as money").
+			Where("transfer_account_id = ?", accountId).
+			Where("type in ?", []int{4}).
+			Where("create_at >= ?", beginningOfMonth.Unix()).
+			Where("create_at <= ?", endOfMonth.Unix()).
+			First(&result)
+		if result["money"] != nil {
+			totalMoney = totalMoney + result["money"].(int64)
+		}
+
+		currentMonthStr := summaryTime.Format("200601")
+
+		monthSummary := models.ChargeSummaryMonth{
+			AccountId: accountId,
+			Date:      currentMonthStr,
+			CashIn:    totalMoney,
+		}
+
+		var count int64
+		db.Model(&models.ChargeSummaryMonth{}).
+			Where("account_id = ?", accountId).
+			Where("date = ?", currentMonthStr).
+			Count(&count)
+
+		if count == 0 {
+			db.Create(monthSummary)
+		} else {
+			db.Model(&models.ChargeSummaryMonth{}).
+				Where("account_id = ?", accountId).
+				Where("date = ?", currentMonthStr).
+				Update("cash_in", totalMoney)
+		}
+	case "cashOut":
+		result := make(map[string]interface{})
+		var totalMoney int64
+		db.Model(&models.ChargeDetail{}).
+			Select("sum(money) as money").
+			Where("account_id = ?", accountId).
+			Where("type in ?", []int{1, 3, 4}).
+			Where("create_at >= ?", beginningOfMonth.Unix()).
+			Where("create_at <= ?", endOfMonth.Unix()).
+			First(&result)
+		if result["money"] != nil {
+			totalMoney = totalMoney + result["money"].(int64)
+		}
+
+		currentMonthStr := summaryTime.Format("200601")
+
+		monthSummary := models.ChargeSummaryMonth{
+			AccountId: accountId,
+			Date:      currentMonthStr,
+			CashOut:   totalMoney,
+		}
+
+		var count int64
+		db.Model(&models.ChargeSummaryMonth{}).
+			Where("account_id = ?", accountId).
+			Where("date = ?", currentMonthStr).
+			Count(&count)
+
+		if count == 0 {
+			db.Create(monthSummary)
+		} else {
+			db.Model(&models.ChargeSummaryMonth{}).
+				Where("account_id = ?", accountId).
+				Where("date = ?", currentMonthStr).
+				Update("cash_out", totalMoney)
+		}
+	case "creditIn":
+		result := make(map[string]interface{})
+		var totalMoney int64
+		db.Model(&models.ChargeDetail{}).
+			Select("sum(money) as money").
+			Where("repay_account_id = ?", accountId).
+			Where("type in ?", []int{3}).
+			Where("create_at >= ?", beginningOfMonth.Unix()).
+			Where("create_at <= ?", endOfMonth.Unix()).
+			First(&result)
+		if result["money"] != nil {
+			totalMoney = totalMoney + result["money"].(int64)
+		}
+
+		currentMonthStr := summaryTime.Format("200601")
+
+		monthSummary := models.ChargeSummaryMonth{
+			AccountId: accountId,
+			Date:      currentMonthStr,
+			CreditIn:  totalMoney,
+		}
+
+		var count int64
+		db.Model(&models.ChargeSummaryMonth{}).
+			Where("account_id = ?", accountId).
+			Where("date = ?", currentMonthStr).
+			Count(&count)
+
+		if count == 0 {
+			db.Create(monthSummary)
+		} else {
+			db.Model(&models.ChargeSummaryMonth{}).
+				Where("account_id = ?", accountId).
+				Where("date = ?", currentMonthStr).
+				Update("credit_in", totalMoney)
+		}
+	case "creditOut":
+		result := make(map[string]interface{})
+		var totalMoney int64
+		db.Model(&models.ChargeDetail{}).
+			Select("sum(money) as money").
+			Where("account_id = ?", accountId).
+			Where("type in ?", []int{2}).
+			Where("create_at >= ?", beginningOfMonth.Unix()).
+			Where("create_at <= ?", endOfMonth.Unix()).
+			First(&result)
+		if result["money"] != nil {
+			totalMoney = totalMoney + result["money"].(int64)
+		}
+
+		currentMonthStr := summaryTime.Format("200601")
+
+		monthSummary := models.ChargeSummaryMonth{
+			AccountId: accountId,
+			Date:      currentMonthStr,
+			CreditOut: totalMoney,
+		}
+
+		var count int64
+		db.Model(&models.ChargeSummaryMonth{}).
+			Where("account_id = ?", accountId).
+			Where("date = ?", currentMonthStr).
+			Count(&count)
+
+		if count == 0 {
+			db.Create(monthSummary)
+		} else {
+			db.Model(&models.ChargeSummaryMonth{}).
+				Where("account_id = ?", accountId).
+				Where("date = ?", currentMonthStr).
+				Update("credit_out", totalMoney)
+		}
+	}
 }
 
 // ------------ 上面各种方法用的 with 函数 -------------------

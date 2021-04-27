@@ -19,7 +19,12 @@ func NewDb() (*gorm.DB, error) {
 
 func AutoMigrate() error {
 	db := container.GetContainer().GetDb()
-	err := db.AutoMigrate(models.Account{}, models.Category{}, models.ChargeDetail{})
+	err := db.AutoMigrate(
+		models.Account{},
+		models.Category{},
+		models.ChargeDetail{},
+		models.ChargeSummaryMonth{},
+	)
 
 	return err
 }
