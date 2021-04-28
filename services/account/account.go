@@ -147,211 +147,80 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 	beginningOfMonth := myConfig.With(summaryTime).BeginningOfMonth()
 	endOfMonth := myConfig.With(summaryTime).EndOfMonth()
 
+	currentMonthStr := summaryTime.Format("200601")
+	currentYear := summaryTime.Year()
+	var existMonthSummary = new(models.ChargeSummaryMonth)
+	dbResult := db.Model(&models.ChargeSummaryMonth{}).
+		Where("account_id = ?", accountId).
+		Where("date = ?", currentMonthStr).
+		First(existMonthSummary)
+	var summaryKeyName string
+	summaryType := make([]int, 0, 0)
+	newMonthSummary := models.ChargeSummaryMonth{
+		AccountId: accountId,
+		Date:      currentMonthStr,
+		Year:      currentYear,
+	}
 	// 根据不同字段进行统计
 	switch fieldName {
 	case "cashIn":
-		result := make(map[string]interface{})
-		var totalMoney int64
-		db.Model(&models.ChargeDetail{}).
-			Select("sum(money) as money").
-			Where("account_id = ?", accountId).
-			Where("type in ?", []int{0}).
-			Where("create_at >= ?", beginningOfMonth.Unix()).
-			Where("create_at <= ?", endOfMonth.Unix()).
-			First(&result)
-		if result["money"] != nil {
-			totalMoney = totalMoney + result["money"].(int64)
-		}
-
-		currentMonthStr := summaryTime.Format("200601")
-		currentYear := summaryTime.Year()
-		var existMonthSummary = new(models.ChargeSummaryMonth)
-		dbResult := db.Model(&models.ChargeSummaryMonth{}).
-			Where("account_id = ?", accountId).
-			Where("date = ?", currentMonthStr).
-			First(existMonthSummary)
-		if dbResult.Error != nil {
-			monthSummary := models.ChargeSummaryMonth{
-				AccountId: accountId,
-				Date:      currentMonthStr,
-				Year:      currentYear,
-				CashIn:    totalMoney,
-			}
-			db.Create(monthSummary)
-		} else {
-			existMonthSummary.CashIn = totalMoney
-			db.Save(existMonthSummary)
-		}
+		summaryKeyName = "account_id"
+		summaryType = append(summaryType, 0)
 	case "cashOut":
-		result := make(map[string]interface{})
-		var totalMoney int64
-		db.Model(&models.ChargeDetail{}).
-			Select("sum(money) as money").
-			Where("account_id = ?", accountId).
-			Where("type in ?", []int{1, 3}).
-			Where("create_at >= ?", beginningOfMonth.Unix()).
-			Where("create_at <= ?", endOfMonth.Unix()).
-			First(&result)
-		if result["money"] != nil {
-			totalMoney = totalMoney + result["money"].(int64)
-		}
-
-		currentMonthStr := summaryTime.Format("200601")
-		currentYear := summaryTime.Year()
-
-		var existMonthSummary = new(models.ChargeSummaryMonth)
-		dbResult := db.Model(&models.ChargeSummaryMonth{}).
-			Where("account_id = ?", accountId).
-			Where("date = ?", currentMonthStr).
-			First(existMonthSummary)
-		if dbResult.Error != nil {
-			monthSummary := models.ChargeSummaryMonth{
-				AccountId: accountId,
-				Date:      currentMonthStr,
-				Year:      currentYear,
-				CashOut:   totalMoney,
-			}
-			db.Create(monthSummary)
-		} else {
-			existMonthSummary.CashOut = totalMoney
-			db.Save(existMonthSummary)
-		}
+		summaryKeyName = "account_id"
+		summaryType = append(summaryType, 1, 3)
 	case "creditIn":
-		result := make(map[string]interface{})
-		var totalMoney int64
-		db.Model(&models.ChargeDetail{}).
-			Select("sum(money) as money").
-			Where("repay_account_id = ?", accountId).
-			Where("type in ?", []int{3}).
-			Where("create_at >= ?", beginningOfMonth.Unix()).
-			Where("create_at <= ?", endOfMonth.Unix()).
-			First(&result)
-		if result["money"] != nil {
-			totalMoney = totalMoney + result["money"].(int64)
-		}
-
-		currentMonthStr := summaryTime.Format("200601")
-		currentYear := summaryTime.Year()
-
-		var existMonthSummary = new(models.ChargeSummaryMonth)
-		dbResult := db.Model(&models.ChargeSummaryMonth{}).
-			Where("account_id = ?", accountId).
-			Where("date = ?", currentMonthStr).
-			First(existMonthSummary)
-		if dbResult.Error != nil {
-			monthSummary := models.ChargeSummaryMonth{
-				AccountId: accountId,
-				Date:      currentMonthStr,
-				Year:      currentYear,
-				CreditIn:  totalMoney,
-			}
-			db.Create(monthSummary)
-		} else {
-			existMonthSummary.CreditIn = totalMoney
-			db.Save(existMonthSummary)
-		}
+		summaryKeyName = "repay_account_id"
+		summaryType = append(summaryType, 3)
 	case "creditOut":
-		result := make(map[string]interface{})
-		var totalMoney int64
-		db.Model(&models.ChargeDetail{}).
-			Select("sum(money) as money").
-			Where("account_id = ?", accountId).
-			Where("type in ?", []int{2}).
-			Where("create_at >= ?", beginningOfMonth.Unix()).
-			Where("create_at <= ?", endOfMonth.Unix()).
-			First(&result)
-		if result["money"] != nil {
-			totalMoney = totalMoney + result["money"].(int64)
-		}
-
-		currentMonthStr := summaryTime.Format("200601")
-		currentYear := summaryTime.Year()
-
-		var existMonthSummary = new(models.ChargeSummaryMonth)
-		dbResult := db.Model(&models.ChargeSummaryMonth{}).
-			Where("account_id = ?", accountId).
-			Where("date = ?", currentMonthStr).
-			First(existMonthSummary)
-		if dbResult.Error != nil {
-			monthSummary := models.ChargeSummaryMonth{
-				AccountId: accountId,
-				Date:      currentMonthStr,
-				Year:      currentYear,
-				CreditOut: totalMoney,
-			}
-			db.Create(monthSummary)
-		} else {
-			existMonthSummary.CreditOut = totalMoney
-			db.Save(existMonthSummary)
-		}
+		summaryKeyName = "account_id"
+		summaryType = append(summaryType, 2)
 	case "transferIn":
-		result := make(map[string]interface{})
-		var totalMoney int64
-		db.Model(&models.ChargeDetail{}).
-			Select("sum(money) as money").
-			Where("transfer_account_id = ?", accountId).
-			Where("type in ?", []int{4}).
-			Where("create_at >= ?", beginningOfMonth.Unix()).
-			Where("create_at <= ?", endOfMonth.Unix()).
-			First(&result)
-		if result["money"] != nil {
-			totalMoney = totalMoney + result["money"].(int64)
-		}
-
-		currentMonthStr := summaryTime.Format("200601")
-		currentYear := summaryTime.Year()
-
-		var existMonthSummary = new(models.ChargeSummaryMonth)
-		dbResult := db.Model(&models.ChargeSummaryMonth{}).
-			Where("account_id = ?", accountId).
-			Where("date = ?", currentMonthStr).
-			First(existMonthSummary)
-		if dbResult.Error != nil {
-			monthSummary := models.ChargeSummaryMonth{
-				AccountId:  accountId,
-				Date:       currentMonthStr,
-				Year:       currentYear,
-				TransferIn: totalMoney,
-			}
-			db.Create(monthSummary)
-		} else {
-			existMonthSummary.TransferIn = totalMoney
-			db.Save(existMonthSummary)
-		}
+		summaryKeyName = "transfer_account_id"
+		summaryType = append(summaryType, 4)
 	case "transferOut":
-		result := make(map[string]interface{})
-		var totalMoney int64
-		db.Model(&models.ChargeDetail{}).
-			Select("sum(money) as money").
-			Where("account_id = ?", accountId).
-			Where("type in ?", []int{4}).
-			Where("create_at >= ?", beginningOfMonth.Unix()).
-			Where("create_at <= ?", endOfMonth.Unix()).
-			First(&result)
-		if result["money"] != nil {
-			totalMoney = totalMoney + result["money"].(int64)
-		}
+		summaryKeyName = "account_id"
+		summaryType = append(summaryType, 4)
+	}
 
-		currentMonthStr := summaryTime.Format("200601")
-		currentYear := summaryTime.Year()
+	result := make(map[string]interface{})
+	var totalMoney int64
+	db.Model(&models.ChargeDetail{}).
+		Select("sum(money) as money").
+		Where(summaryKeyName+" = ?", accountId).
+		Where("type in ?", summaryType).
+		Where("create_at >= ?", beginningOfMonth.Unix()).
+		Where("create_at <= ?", endOfMonth.Unix()).
+		First(&result)
+	if result["money"] != nil {
+		totalMoney = totalMoney + result["money"].(int64)
+	}
 
-		var existMonthSummary = new(models.ChargeSummaryMonth)
-		dbResult := db.Model(&models.ChargeSummaryMonth{}).
-			Where("account_id = ?", accountId).
-			Where("date = ?", currentMonthStr).
-			First(existMonthSummary)
-		if dbResult.Error != nil {
-			monthSummary := models.ChargeSummaryMonth{
-				AccountId:   accountId,
-				Date:        currentMonthStr,
-				Year:        currentYear,
-				TransferOut: totalMoney,
-			}
-			db.Create(monthSummary)
-		} else {
-			existMonthSummary.TransferOut = totalMoney
-			db.Save(existMonthSummary)
-		}
+	switch fieldName {
+	case "cashIn":
+		newMonthSummary.CashIn = totalMoney
+		existMonthSummary.CashIn = totalMoney
+	case "cashOut":
+		newMonthSummary.CashOut = totalMoney
+		existMonthSummary.CashOut = totalMoney
+	case "creditIn":
+		newMonthSummary.CreditIn = totalMoney
+		existMonthSummary.CreditIn = totalMoney
+	case "creditOut":
+		newMonthSummary.CreditOut = totalMoney
+		existMonthSummary.CreditOut = totalMoney
+	case "transferIn":
+		newMonthSummary.TransferIn = totalMoney
+		existMonthSummary.TransferIn = totalMoney
+	case "transferOut":
+		newMonthSummary.TransferOut = totalMoney
+		existMonthSummary.TransferOut = totalMoney
+	}
+
+	if dbResult.Error != nil {
+		db.Create(newMonthSummary)
+	} else {
+		db.Save(existMonthSummary)
 	}
 }
 
