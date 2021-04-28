@@ -166,12 +166,11 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 		currentMonthStr := summaryTime.Format("200601")
 
 		var existMonthSummary = new(models.ChargeSummaryMonth)
-		db.Model(&models.ChargeSummaryMonth{}).
+		dbResult := db.Model(&models.ChargeSummaryMonth{}).
 			Where("account_id = ?", accountId).
 			Where("date = ?", currentMonthStr).
 			First(existMonthSummary)
-
-		if existMonthSummary.AccountId == 0 {
+		if dbResult.Error != nil {
 			monthSummary := models.ChargeSummaryMonth{
 				AccountId: accountId,
 				Date:      currentMonthStr,
@@ -199,12 +198,11 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 		currentMonthStr := summaryTime.Format("200601")
 
 		var existMonthSummary = new(models.ChargeSummaryMonth)
-		db.Model(&models.ChargeSummaryMonth{}).
+		dbResult := db.Model(&models.ChargeSummaryMonth{}).
 			Where("account_id = ?", accountId).
 			Where("date = ?", currentMonthStr).
 			First(existMonthSummary)
-
-		if existMonthSummary.AccountId == 0 {
+		if dbResult.Error != nil {
 			monthSummary := models.ChargeSummaryMonth{
 				AccountId: accountId,
 				Date:      currentMonthStr,
@@ -232,12 +230,11 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 		currentMonthStr := summaryTime.Format("200601")
 
 		var existMonthSummary = new(models.ChargeSummaryMonth)
-		db.Model(&models.ChargeSummaryMonth{}).
+		dbResult := db.Model(&models.ChargeSummaryMonth{}).
 			Where("account_id = ?", accountId).
 			Where("date = ?", currentMonthStr).
 			First(existMonthSummary)
-
-		if existMonthSummary.AccountId == 0 {
+		if dbResult.Error != nil {
 			monthSummary := models.ChargeSummaryMonth{
 				AccountId: accountId,
 				Date:      currentMonthStr,
@@ -265,12 +262,11 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 		currentMonthStr := summaryTime.Format("200601")
 
 		var existMonthSummary = new(models.ChargeSummaryMonth)
-		db.Model(&models.ChargeSummaryMonth{}).
+		dbResult := db.Model(&models.ChargeSummaryMonth{}).
 			Where("account_id = ?", accountId).
 			Where("date = ?", currentMonthStr).
 			First(existMonthSummary)
-
-		if existMonthSummary.AccountId == 0 {
+		if dbResult.Error != nil {
 			monthSummary := models.ChargeSummaryMonth{
 				AccountId: accountId,
 				Date:      currentMonthStr,
@@ -298,12 +294,11 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 		currentMonthStr := summaryTime.Format("200601")
 
 		var existMonthSummary = new(models.ChargeSummaryMonth)
-		db.Model(&models.ChargeSummaryMonth{}).
+		dbResult := db.Model(&models.ChargeSummaryMonth{}).
 			Where("account_id = ?", accountId).
 			Where("date = ?", currentMonthStr).
 			First(existMonthSummary)
-
-		if existMonthSummary.AccountId == 0 {
+		if dbResult.Error != nil {
 			monthSummary := models.ChargeSummaryMonth{
 				AccountId:  accountId,
 				Date:       currentMonthStr,
@@ -331,12 +326,11 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 		currentMonthStr := summaryTime.Format("200601")
 
 		var existMonthSummary = new(models.ChargeSummaryMonth)
-		db.Model(&models.ChargeSummaryMonth{}).
+		dbResult := db.Model(&models.ChargeSummaryMonth{}).
 			Where("account_id = ?", accountId).
 			Where("date = ?", currentMonthStr).
 			First(existMonthSummary)
-
-		if existMonthSummary.AccountId == 0 {
+		if dbResult.Error != nil {
 			monthSummary := models.ChargeSummaryMonth{
 				AccountId:   accountId,
 				Date:        currentMonthStr,
