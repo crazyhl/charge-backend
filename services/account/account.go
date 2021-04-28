@@ -164,7 +164,7 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 		}
 
 		currentMonthStr := summaryTime.Format("200601")
-
+		currentYear := summaryTime.Year()
 		var existMonthSummary = new(models.ChargeSummaryMonth)
 		dbResult := db.Model(&models.ChargeSummaryMonth{}).
 			Where("account_id = ?", accountId).
@@ -174,6 +174,7 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 			monthSummary := models.ChargeSummaryMonth{
 				AccountId: accountId,
 				Date:      currentMonthStr,
+				Year:      currentYear,
 				CashIn:    totalMoney,
 			}
 			db.Create(monthSummary)
@@ -196,6 +197,7 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 		}
 
 		currentMonthStr := summaryTime.Format("200601")
+		currentYear := summaryTime.Year()
 
 		var existMonthSummary = new(models.ChargeSummaryMonth)
 		dbResult := db.Model(&models.ChargeSummaryMonth{}).
@@ -206,6 +208,7 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 			monthSummary := models.ChargeSummaryMonth{
 				AccountId: accountId,
 				Date:      currentMonthStr,
+				Year:      currentYear,
 				CashOut:   totalMoney,
 			}
 			db.Create(monthSummary)
@@ -228,6 +231,7 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 		}
 
 		currentMonthStr := summaryTime.Format("200601")
+		currentYear := summaryTime.Year()
 
 		var existMonthSummary = new(models.ChargeSummaryMonth)
 		dbResult := db.Model(&models.ChargeSummaryMonth{}).
@@ -238,6 +242,7 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 			monthSummary := models.ChargeSummaryMonth{
 				AccountId: accountId,
 				Date:      currentMonthStr,
+				Year:      currentYear,
 				CreditIn:  totalMoney,
 			}
 			db.Create(monthSummary)
@@ -260,6 +265,7 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 		}
 
 		currentMonthStr := summaryTime.Format("200601")
+		currentYear := summaryTime.Year()
 
 		var existMonthSummary = new(models.ChargeSummaryMonth)
 		dbResult := db.Model(&models.ChargeSummaryMonth{}).
@@ -270,6 +276,7 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 			monthSummary := models.ChargeSummaryMonth{
 				AccountId: accountId,
 				Date:      currentMonthStr,
+				Year:      currentYear,
 				CreditOut: totalMoney,
 			}
 			db.Create(monthSummary)
@@ -292,6 +299,7 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 		}
 
 		currentMonthStr := summaryTime.Format("200601")
+		currentYear := summaryTime.Year()
 
 		var existMonthSummary = new(models.ChargeSummaryMonth)
 		dbResult := db.Model(&models.ChargeSummaryMonth{}).
@@ -302,6 +310,7 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 			monthSummary := models.ChargeSummaryMonth{
 				AccountId:  accountId,
 				Date:       currentMonthStr,
+				Year:       currentYear,
 				TransferIn: totalMoney,
 			}
 			db.Create(monthSummary)
@@ -324,6 +333,7 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 		}
 
 		currentMonthStr := summaryTime.Format("200601")
+		currentYear := summaryTime.Year()
 
 		var existMonthSummary = new(models.ChargeSummaryMonth)
 		dbResult := db.Model(&models.ChargeSummaryMonth{}).
@@ -334,6 +344,7 @@ func SummaryMoney(fieldName string, accountId uint, summaryTime time.Time) {
 			monthSummary := models.ChargeSummaryMonth{
 				AccountId:   accountId,
 				Date:        currentMonthStr,
+				Year:        currentYear,
 				TransferOut: totalMoney,
 			}
 			db.Create(monthSummary)
