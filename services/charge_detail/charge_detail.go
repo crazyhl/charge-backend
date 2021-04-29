@@ -15,7 +15,7 @@ func List(pageStart, pageSize int) dto.ListData {
 	var detailRows []models.ChargeDetail
 	var totalCount int64
 	db := container.GetContainer().GetDb()
-	db.Limit(pageSize).Offset(pageStart).Order("id DESC").Preload(clause.Associations).Find(&detailRows)
+	db.Limit(pageSize).Offset(pageStart).Order("create_at DESC").Preload(clause.Associations).Find(&detailRows)
 	db.Model(&models.ChargeDetail{}).Count(&totalCount)
 	for _, detail := range detailRows {
 		createTm := time.Unix(detail.CreateAt, 0)
@@ -34,8 +34,8 @@ func List(pageStart, pageSize int) dto.ListData {
 			Type:        detail.Type,
 			Money:       float64(detail.Money) / 1000.0,
 			Description: detail.Description,
-			CreateAt:    createTm.Format("2006-01-02 15:04:05"),
-			UpdateAt:    updateTm.Format("2006-01-02 15:04:05"),
+			CreateAt:    createTm.Format("2006-01-02"),
+			UpdateAt:    updateTm.Format("2006-01-02"),
 		}
 
 		if detail.CategoryId != 0 {
@@ -50,7 +50,7 @@ func List(pageStart, pageSize int) dto.ListData {
 			repaidDetailCreateTm := time.Unix(detail.RepaidDetail.CreateAt, 0)
 			chargeDetailDto.RepaidDetail = &dto.RepaidDetail{
 				ID:       detail.RepaidDetail.RepaidDetailId,
-				CreateAt: repaidDetailCreateTm.Format("2006-01-02 15:04:05"),
+				CreateAt: repaidDetailCreateTm.Format("2006-01-02"),
 			}
 		}
 		if detail.RepayAccountId != 0 {
@@ -78,7 +78,7 @@ func List(pageStart, pageSize int) dto.ListData {
 	return listData
 }
 
-func Add(accountId uint, _type uint8, categoryId uint, money int64, description string, repayAccountId uint, transferAccountId uint) (*models.ChargeDetail, error) {
+func Add(accountId uint, _type uint8, categoryId uint, money int64, description string, repayAccountId uint, transferAccountId uint, createAt int64) (*models.ChargeDetail, error) {
 	detail := new(models.ChargeDetail)
 	detail.AccountId = accountId
 	detail.Type = _type
@@ -87,6 +87,7 @@ func Add(accountId uint, _type uint8, categoryId uint, money int64, description 
 	detail.Description = description
 	detail.RepayAccountId = repayAccountId
 	detail.TransferAccountId = transferAccountId
+	detail.CreateAt = createAt
 	db := container.GetContainer().GetDb()
 	result := db.Create(detail)
 
@@ -149,7 +150,7 @@ func GetUnPaidList(accountId uint) []dto.UnpaidDetail {
 		}
 		unpaidDetail.Money = float64(detail.Money) / 1000.0
 		unpaidDetail.Description = detail.Description
-		unpaidDetail.CreateAt = createTm.Format("2006-01-02 15:04:05")
+		unpaidDetail.CreateAt = createTm.Format("2006-01-02")
 		unPaidDetailDtoList = append(unPaidDetailDtoList, *unpaidDetail)
 	}
 
@@ -157,7 +158,7 @@ func GetUnPaidList(accountId uint) []dto.UnpaidDetail {
 }
 
 // Edit 编辑账单
-func Edit(id uint, accountId uint, _type uint8, categoryId uint, money int64, description string, repayAccountId uint, transferAccountId uint) (*models.ChargeDetail, error) {
+func Edit(id uint, accountId uint, _type uint8, categoryId uint, money int64, description string, repayAccountId uint, transferAccountId uint, createAt int64) (*models.ChargeDetail, error) {
 	db := container.GetContainer().GetDb()
 	detail := new(models.ChargeDetail)
 	db.Where("id = ?", id).First(detail)
@@ -172,6 +173,7 @@ func Edit(id uint, accountId uint, _type uint8, categoryId uint, money int64, de
 	detail.Description = description
 	detail.RepayAccountId = repayAccountId
 	detail.TransferAccountId = transferAccountId
+	detail.CreateAt = createAt
 
 	result := db.Save(detail)
 
@@ -198,7 +200,7 @@ func GetRepaidList(id uint) []dto.RepaidDetail {
 				Name: detail.Category.Name,
 			},
 			Description: detail.Description,
-			CreateAt:    createTm.Format("2006-01-02 15:04:05"),
+			CreateAt:    createTm.Format("2006-01-02"),
 		})
 	}
 

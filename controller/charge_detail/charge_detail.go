@@ -22,6 +22,7 @@ type addDetail struct {
 	RepayDetailIds    []uint  `json:"repay_detail_ids" form:"repay_detail_ids"`
 	RepayAccountId    uint    `json:"repay_account_id" form:"repay_account_id"`
 	TransferAccountId uint    `json:"transfer_account_id" form:"transfer_account_id"`
+	CreateAt          int64   `json:"date" form:"date"`
 }
 
 type editDetail struct {
@@ -34,6 +35,7 @@ type editDetail struct {
 	RepayDetailIds    []uint  `json:"repay_detail_ids" form:"repay_detail_ids"`
 	RepayAccountId    uint    `json:"repay_account_id" form:"repay_account_id"`
 	TransferAccountId uint    `json:"transfer_account_id" form:"transfer_account_id"`
+	CreateAt          int64   `json:"date" form:"date"`
 }
 
 func List(ctx *fiber.Ctx) error {
@@ -152,11 +154,11 @@ func Add(ctx *fiber.Ctx) error {
 		detail.Description,
 		detail.RepayAccountId,
 		detail.TransferAccountId,
+		detail.CreateAt,
 	)
 
 	if err == nil {
 		// 改钱采用按月统计合并的方式
-
 		switch *detail.Type {
 		case 0:
 			// 收入 改变账户 cashIn
@@ -195,13 +197,36 @@ func Delete(ctx *fiber.Ctx) error {
 			"message": err.Error(),
 		})
 	}
-	_, err = charge_detail.Delete(uint(id))
+	detail, err := charge_detail.Delete(uint(id))
 	if err != nil {
 		return ctx.JSON(fiber.Map{
 			"status":  -2,
 			"message": err.Error(),
 		})
 	}
+
+	switch detail.Type {
+	case 0:
+		// 收入 改变账户 cashIn
+		accountService.SummaryMoney("cashIn", detail.AccountId, time.Now())
+	case 1:
+		// 支出 改变账户 cashOut
+		accountService.SummaryMoney("cashOut", detail.AccountId, time.Now())
+	case 2:
+		// 借 改变账户 creditOut
+		accountService.SummaryMoney("creditOut", detail.AccountId, time.Now())
+	case 3:
+		// 还 改变账户 cashOut 改变 还款账户 creditIn
+		accountService.SummaryMoney("cashOut", detail.AccountId, time.Now())
+		accountService.SummaryMoney("creditIn", detail.RepayAccountId, time.Now())
+		// 更新借款账目的还款id
+		charge_detail.ClearRepay(detail.RepaidDetailId)
+	case 4:
+		// 转 改变账户 transferOut  改变 转账账户 transferIn
+		accountService.SummaryMoney("transferOut", detail.AccountId, time.Now())
+		accountService.SummaryMoney("transferIn", detail.TransferAccountId, time.Now())
+	}
+
 	return ctx.JSON(fiber.Map{
 		"status":  0,
 		"message": "删除成功",
@@ -327,6 +352,7 @@ func Edit(ctx *fiber.Ctx) error {
 		detail.Description,
 		detail.RepayAccountId,
 		detail.TransferAccountId,
+		detail.CreateAt,
 	)
 
 	if err != nil {
