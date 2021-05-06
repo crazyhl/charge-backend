@@ -162,23 +162,23 @@ func Add(ctx *fiber.Ctx) error {
 		switch *detail.Type {
 		case 0:
 			// 收入 改变账户 cashIn
-			accountService.SummaryMoney("cashIn", detail.AccountId, time.Now())
+			accountService.SummaryMoney("cashIn", detail.AccountId, time.Unix(detail.CreateAt, 0))
 		case 1:
 			// 支出 改变账户 cashOut
-			accountService.SummaryMoney("cashOut", detail.AccountId, time.Now())
+			accountService.SummaryMoney("cashOut", detail.AccountId, time.Unix(detail.CreateAt, 0))
 		case 2:
 			// 借 改变账户 creditOut
-			accountService.SummaryMoney("creditOut", detail.AccountId, time.Now())
+			accountService.SummaryMoney("creditOut", detail.AccountId, time.Unix(detail.CreateAt, 0))
 		case 3:
 			// 还 改变账户 cashOut 改变 还款账户 creditIn
-			accountService.SummaryMoney("cashOut", detail.AccountId, time.Now())
-			accountService.SummaryMoney("creditIn", detail.RepayAccountId, time.Now())
+			accountService.SummaryMoney("cashOut", detail.AccountId, time.Unix(detail.CreateAt, 0))
+			accountService.SummaryMoney("creditIn", detail.RepayAccountId, time.Unix(detail.CreateAt, 0))
 			// 更新借款账目的还款id
 			charge_detail.UpdateRepay(chargeDetail.ID, detail.RepayDetailIds)
 		case 4:
 			// 转 改变账户 transferOut  改变 转账账户 transferIn
-			accountService.SummaryMoney("transferOut", detail.AccountId, time.Now())
-			accountService.SummaryMoney("transferIn", detail.TransferAccountId, time.Now())
+			accountService.SummaryMoney("transferOut", detail.AccountId, time.Unix(detail.CreateAt, 0))
+			accountService.SummaryMoney("transferIn", detail.TransferAccountId, time.Unix(detail.CreateAt, 0))
 		}
 	}
 
@@ -208,23 +208,23 @@ func Delete(ctx *fiber.Ctx) error {
 	switch detail.Type {
 	case 0:
 		// 收入 改变账户 cashIn
-		accountService.SummaryMoney("cashIn", detail.AccountId, time.Now())
+		accountService.SummaryMoney("cashIn", detail.AccountId, time.Unix(detail.CreateAt, 0))
 	case 1:
 		// 支出 改变账户 cashOut
-		accountService.SummaryMoney("cashOut", detail.AccountId, time.Now())
+		accountService.SummaryMoney("cashOut", detail.AccountId, time.Unix(detail.CreateAt, 0))
 	case 2:
 		// 借 改变账户 creditOut
-		accountService.SummaryMoney("creditOut", detail.AccountId, time.Now())
+		accountService.SummaryMoney("creditOut", detail.AccountId, time.Unix(detail.CreateAt, 0))
 	case 3:
 		// 还 改变账户 cashOut 改变 还款账户 creditIn
-		accountService.SummaryMoney("cashOut", detail.AccountId, time.Now())
-		accountService.SummaryMoney("creditIn", detail.RepayAccountId, time.Now())
+		accountService.SummaryMoney("cashOut", detail.AccountId, time.Unix(detail.CreateAt, 0))
+		accountService.SummaryMoney("creditIn", detail.RepayAccountId, time.Unix(detail.CreateAt, 0))
 		// 更新借款账目的还款id
 		charge_detail.ClearRepay(detail.RepaidDetailId)
 	case 4:
 		// 转 改变账户 transferOut  改变 转账账户 transferIn
-		accountService.SummaryMoney("transferOut", detail.AccountId, time.Now())
-		accountService.SummaryMoney("transferIn", detail.TransferAccountId, time.Now())
+		accountService.SummaryMoney("transferOut", detail.AccountId, time.Unix(detail.CreateAt, 0))
+		accountService.SummaryMoney("transferIn", detail.TransferAccountId, time.Unix(detail.CreateAt, 0))
 	}
 
 	return ctx.JSON(fiber.Map{
