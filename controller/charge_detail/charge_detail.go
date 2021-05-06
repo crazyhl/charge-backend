@@ -4,7 +4,6 @@ import (
 	"charge/container"
 	"charge/models"
 	accountService "charge/services/account"
-	"charge/services/category"
 	"charge/services/charge_detail"
 	"charge/utils"
 	"fmt"
@@ -138,7 +137,7 @@ func Add(ctx *fiber.Ctx) error {
 		db.Where("id =?", detail.CategoryId).Where("type =?", detail.Type).First(cate)
 		if cate.ID == 0 {
 			return ctx.JSON(fiber.Map{
-				"status":  -8,
+				"status":  -9,
 				"message": "所选分类不存在",
 			})
 		}
@@ -243,7 +242,7 @@ func EditDetail(ctx *fiber.Ctx) error {
 		})
 	}
 
-	categoryDto, err := category.EditDetail(id)
+	detail, err := charge_detail.EditDetail(id)
 	if err != nil {
 		return ctx.JSON(fiber.Map{
 			"status":  -2,
@@ -253,7 +252,7 @@ func EditDetail(ctx *fiber.Ctx) error {
 
 	return ctx.JSON(fiber.Map{
 		"status": 0,
-		"data":   categoryDto,
+		"data":   detail,
 	})
 }
 
@@ -267,10 +266,19 @@ func Edit(ctx *fiber.Ctx) error {
 			"message": err.Error(),
 		})
 	}
+
+	oldDetail := new(models.ChargeDetail)
+	db.Where("id = ?", detail.Id).First(oldDetail)
+	if oldDetail.ID == 0 {
+		return ctx.JSON(fiber.Map{
+			"status":  -10,
+			"message": "更新对象不存在",
+		})
+	}
+
 	// 验证
 	validateError := utils.Validate(detail)
 	if validateError != nil {
-		fmt.Println(validateError)
 		return ctx.JSON(fiber.Map{
 			"status":  -3,
 			"message": validateError.Error(),
@@ -335,7 +343,7 @@ func Edit(ctx *fiber.Ctx) error {
 		db.Where("id =?", detail.CategoryId).Where("type =?", detail.Type).First(cate)
 		if cate.ID == 0 {
 			return ctx.JSON(fiber.Map{
-				"status":  -8,
+				"status":  -9,
 				"message": "所选分类不存在",
 			})
 		}
@@ -343,7 +351,7 @@ func Edit(ctx *fiber.Ctx) error {
 
 	money := detail.Money * 1000
 
-	newAccount, err := charge_detail.Edit(
+	newDetail, err := charge_detail.Edit(
 		detail.Id,
 		detail.AccountId,
 		*detail.Type,
@@ -362,9 +370,51 @@ func Edit(ctx *fiber.Ctx) error {
 		})
 	}
 
+	switch oldDetail.Type {
+	case 0:
+		// 收入 改变账户 cashIn
+		accountService.SummaryMoney("cashIn", oldDetail.AccountId, time.Unix(oldDetail.CreateAt, 0))
+	case 1:
+		// 支出 改变账户 cashOut
+		accountService.SummaryMoney("cashOut", oldDetail.AccountId, time.Unix(oldDetail.CreateAt, 0))
+	case 2:
+		// 借 改变账户 creditOut
+		accountService.SummaryMoney("creditOut", oldDetail.AccountId, time.Unix(oldDetail.CreateAt, 0))
+	case 3:
+		// 还 改变账户 cashOut 改变 还款账户 creditIn
+		accountService.SummaryMoney("cashOut", oldDetail.AccountId, time.Unix(oldDetail.CreateAt, 0))
+		accountService.SummaryMoney("creditIn", oldDetail.RepayAccountId, time.Unix(oldDetail.CreateAt, 0))
+		// 更新借款账目的还款id
+	case 4:
+		// 转 改变账户 transferOut  改变 转账账户 transferIn
+		accountService.SummaryMoney("transferOut", oldDetail.AccountId, time.Unix(oldDetail.CreateAt, 0))
+		accountService.SummaryMoney("transferIn", oldDetail.TransferAccountId, time.Unix(oldDetail.CreateAt, 0))
+	}
+
+	switch *detail.Type {
+	case 0:
+		// 收入 改变账户 cashIn
+		accountService.SummaryMoney("cashIn", detail.AccountId, time.Unix(detail.CreateAt, 0))
+	case 1:
+		// 支出 改变账户 cashOut
+		accountService.SummaryMoney("cashOut", detail.AccountId, time.Unix(detail.CreateAt, 0))
+	case 2:
+		// 借 改变账户 creditOut
+		accountService.SummaryMoney("creditOut", detail.AccountId, time.Unix(detail.CreateAt, 0))
+	case 3:
+		// 还 改变账户 cashOut 改变 还款账户 creditIn
+		accountService.SummaryMoney("cashOut", detail.AccountId, time.Unix(detail.CreateAt, 0))
+		accountService.SummaryMoney("creditIn", detail.RepayAccountId, time.Unix(detail.CreateAt, 0))
+		// 更新借款账目的还款id
+	case 4:
+		// 转 改变账户 transferOut  改变 转账账户 transferIn
+		accountService.SummaryMoney("transferOut", detail.AccountId, time.Unix(detail.CreateAt, 0))
+		accountService.SummaryMoney("transferIn", detail.TransferAccountId, time.Unix(detail.CreateAt, 0))
+	}
+
 	return ctx.JSON(fiber.Map{
 		"status":  0,
-		"data":    newAccount,
+		"data":    newDetail,
 		"message": "修改成功",
 	})
 }
