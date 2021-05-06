@@ -219,7 +219,7 @@ func Delete(ctx *fiber.Ctx) error {
 		accountService.SummaryMoney("cashOut", detail.AccountId, time.Unix(detail.CreateAt, 0))
 		accountService.SummaryMoney("creditIn", detail.RepayAccountId, time.Unix(detail.CreateAt, 0))
 		// 更新借款账目的还款id
-		charge_detail.ClearRepay(detail.RepaidDetailId)
+		charge_detail.ClearRepay(detail.ID)
 	case 4:
 		// 转 改变账户 transferOut  改变 转账账户 transferIn
 		accountService.SummaryMoney("transferOut", detail.AccountId, time.Unix(detail.CreateAt, 0))
@@ -385,7 +385,7 @@ func Edit(ctx *fiber.Ctx) error {
 		accountService.SummaryMoney("cashOut", oldDetail.AccountId, time.Unix(oldDetail.CreateAt, 0))
 		accountService.SummaryMoney("creditIn", oldDetail.RepayAccountId, time.Unix(oldDetail.CreateAt, 0))
 		// 更新借款账目的还款id
-		charge_detail.ClearRepay(oldDetail.RepaidDetailId)
+		charge_detail.ClearRepay(oldDetail.ID)
 	case 4:
 		// 转 改变账户 transferOut  改变 转账账户 transferIn
 		accountService.SummaryMoney("transferOut", oldDetail.AccountId, time.Unix(oldDetail.CreateAt, 0))

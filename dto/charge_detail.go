@@ -36,5 +36,6 @@ type ChargeEditDetail struct {
 	Description       string         `json:"description"`
 	RepayAccountId    uint           `json:"repay_account_id"`
 	TransferAccountId uint           `json:"transfer_account_id"`
-	RepaidDetails     []RepaidDetail `json:"repaid_details"`
+	RepaidDetails     []RepaidDetail `json:"repaid_details,omitempty"`
+	CreateAt          int64          `json:"create_at,omitempty"`
 }

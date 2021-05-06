@@ -68,7 +68,8 @@ func main() {
 	chargeDetailGroup.Post("", charge_detail.Add)
 	chargeDetailGroup.Get("/list", charge_detail.List)
 	chargeDetailGroup.Delete("/:id", charge_detail.Delete)
-	chargeDetailGroup.Put("/:id", category.Edit)
+	chargeDetailGroup.Put("/:id", charge_detail.Edit)
+	chargeDetailGroup.Get("/:id/edit", charge_detail.EditDetail)
 
 	err := app.Listen(viper.GetString("http-server.host") + ":" + viper.GetString("http-server.port"))
 	if err != nil {

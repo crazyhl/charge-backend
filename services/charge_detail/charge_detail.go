@@ -125,6 +125,7 @@ func EditDetail(id int) (*dto.ChargeEditDetail, error) {
 	detailDto.Description = detail.Description
 	detailDto.RepayAccountId = detail.RepayAccountId
 	detailDto.TransferAccountId = detail.TransferAccountId
+	detailDto.CreateAt = detail.CreateAt
 	if detail.Type == 3 {
 		detailDto.RepaidDetails = GetRepaidList(detail.ID)
 	}
@@ -185,14 +186,14 @@ func GetRepaidList(id uint) []dto.RepaidDetail {
 	paidDtoList := make([]dto.RepaidDetail, 0, 0)
 	var list []models.ChargeDetail
 	db.Model(models.ChargeDetail{}).Where(
-		"id = ?",
+		"repaid_detail_id = ?",
 		id,
 	).Find(&list)
 
 	for _, detail := range list {
 		createTm := time.Unix(detail.CreateAt, 0)
 		paidDtoList = append(paidDtoList, dto.RepaidDetail{
-			ID:    detail.RepaidDetailId,
+			ID:    detail.ID,
 			Money: float64(detail.Money) / 1000.0,
 			Category: &dto.Category{
 				ID:   detail.Category.ID,
@@ -222,9 +223,9 @@ func UpdateRepay(repaidId uint, chargeIdArr []uint) {
 func ClearRepay(id uint) {
 	db := container.GetContainer().GetDb()
 	db.Model(models.ChargeDetail{}).Where(
-		"repay_detail_id in ?",
+		"repaid_detail_id = ?",
 		id,
 	).Updates(
-		models.ChargeDetail{RepaidDetailId: 0},
+		map[string]interface{}{"repaid_detail_id": 0},
 	)
 }
