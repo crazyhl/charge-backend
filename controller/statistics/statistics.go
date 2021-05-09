@@ -72,7 +72,7 @@ func SummaryMonthData(ctx *fiber.Ctx) error {
 
 // ExpensesCategory 支出分类统计
 func ExpensesCategory(ctx *fiber.Ctx) error {
-	//db := container.GetContainer().GetDb()
+	db := container.GetContainer().GetDb()
 	month := ctx.Params("month")
 	location, _ := time.LoadLocation("Asia/Shanghai")
 	monthTime, _ := time.Parse("20060102 -0700 MST", month+"01 +0800 CST")
@@ -83,15 +83,30 @@ func ExpensesCategory(ctx *fiber.Ctx) error {
 
 	beginningOfMonth := myConfig.With(monthTime).BeginningOfMonth()
 	endOfMonth := myConfig.With(monthTime).EndOfMonth()
+	// 统计分类
+	summaryCategoryDetails := make([]models.ChargeDetail, 0, 0)
+	chargeSummaryCategoryDetails := make([]dto.ChargeSummaryCategoryDetail, 0, 0)
+	db.Model(models.ChargeDetail{}).Where("type in ?", []int{1, 2}).
+		Where("create_at >= ?", beginningOfMonth.Unix()).
+		Where("create_at <= ?", endOfMonth.Unix()).
+		Preload(clause.Associations).
+		Select("type, category_id, sum(money) as money").Group("category_id").
+		Order("category_id ASC").
+		Find(&summaryCategoryDetails)
 
-	fmt.Println(month + "01")
-	fmt.Println(beginningOfMonth)
-	fmt.Println(endOfMonth)
-	fmt.Println(beginningOfMonth.Unix())
-	fmt.Println(endOfMonth.Unix())
+	for _, detail := range summaryCategoryDetails {
+		chargeSummaryCategoryDetails = append(chargeSummaryCategoryDetails, dto.ChargeSummaryCategoryDetail{
+			Category: dto.Category{
+				ID:   detail.Category.ID,
+				Name: detail.Category.Name,
+			},
+			Money: float64(detail.Money) / 1000,
+			Type:  detail.Type,
+		})
+	}
 
 	return ctx.JSON(fiber.Map{
 		"status": 0,
-		"data":   string(beginningOfMonth.Unix()) + " -- " + string(endOfMonth.Unix()),
+		"data":   chargeSummaryCategoryDetails,
 	})
 }
