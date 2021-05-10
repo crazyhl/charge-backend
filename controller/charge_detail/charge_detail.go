@@ -8,6 +8,7 @@ import (
 	"charge/utils"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jinzhu/now"
 	"strconv"
 	"time"
 )
@@ -40,6 +41,22 @@ type editDetail struct {
 func List(ctx *fiber.Ctx) error {
 	page := ctx.Query("page", "1")
 	size := ctx.Query("pageSize", "20")
+	month := ctx.Params("month", "")
+	category, _ := ctx.ParamsInt("category")
+
+	var beginningOfMonth time.Time
+	var endOfMonth time.Time
+	if month != "" {
+		location, _ := time.LoadLocation("Asia/Shanghai")
+		monthTime, _ := time.Parse("20060102 -0700 MST", month+"01 +0800 CST")
+
+		myConfig := &now.Config{
+			TimeLocation: location,
+		}
+
+		beginningOfMonth = myConfig.With(monthTime).BeginningOfMonth()
+		endOfMonth = myConfig.With(monthTime).EndOfMonth()
+	}
 
 	pageInt, _ := strconv.Atoi(page)
 	pageSizeInt, _ := strconv.Atoi(size)
@@ -50,7 +67,7 @@ func List(ctx *fiber.Ctx) error {
 		pageInt = 1
 	}
 	pageStart := (pageInt - 1) * pageSizeInt
-	listData := charge_detail.List(pageStart, pageSizeInt)
+	listData := charge_detail.List(pageStart, pageSizeInt, category, beginningOfMonth.Unix(), endOfMonth.Unix())
 
 	return ctx.JSON(fiber.Map{
 		"status": 0,

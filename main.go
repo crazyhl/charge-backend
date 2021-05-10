@@ -67,7 +67,7 @@ func main() {
 	chargeDetailGroup := app.Group("/chargeDetail")
 	chargeDetailGroup.Get("/unRepayList/:accountId", charge_detail.UnRepayList)
 	chargeDetailGroup.Post("", charge_detail.Add)
-	chargeDetailGroup.Get("/list", charge_detail.List)
+	chargeDetailGroup.Get("/list/:month?/:category?", charge_detail.List)
 	chargeDetailGroup.Delete("/:id", charge_detail.Delete)
 	chargeDetailGroup.Put("/:id", charge_detail.Edit)
 	chargeDetailGroup.Get("/:id/edit", charge_detail.EditDetail)

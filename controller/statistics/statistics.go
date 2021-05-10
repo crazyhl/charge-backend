@@ -91,6 +91,7 @@ func ExpensesCategory(ctx *fiber.Ctx) error {
 		Where("create_at <= ?", endOfMonth.Unix()).
 		Preload(clause.Associations).
 		Select("type, category_id, sum(money) as money").Group("category_id").
+		Order("type ASC").
 		Order("category_id ASC").
 		Find(&summaryCategoryDetails)
 

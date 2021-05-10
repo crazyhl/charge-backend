@@ -9,13 +9,25 @@ import (
 	"time"
 )
 
-func List(pageStart, pageSize int) dto.ListData {
+func List(pageStart, pageSize int, categoryId int, timeStart int64, timeEnd int64) dto.ListData {
 	var listData dto.ListData
 	var details []dto.ChargeDetail
 	var detailRows []models.ChargeDetail
 	var totalCount int64
 	db := container.GetContainer().GetDb()
-	db.Limit(pageSize).Offset(pageStart).Order("create_at DESC").Preload(clause.Associations).Find(&detailRows)
+	query := db.Preload(clause.Associations)
+	if categoryId > 0 {
+		query.Where("category_id = ?", categoryId)
+	}
+	if timeStart > 0 {
+		query.Where("create_at >= ?", timeStart)
+	}
+	if timeEnd > 0 {
+		query.Where("create_at <= ?", timeEnd)
+	}
+
+	query.Limit(pageSize).Offset(pageStart).Order("create_at DESC")
+	query.Find(&detailRows)
 	db.Model(&models.ChargeDetail{}).Count(&totalCount)
 	for _, detail := range detailRows {
 		createTm := time.Unix(detail.CreateAt, 0)
