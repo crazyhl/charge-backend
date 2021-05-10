@@ -41,7 +41,7 @@ func SummaryMonthData(ctx *fiber.Ctx) error {
 		Date:    totalAccountMonthData.Date,
 		Year:    totalAccountMonthData.Year,
 		CashIn:  float64(totalAccountMonthData.CashIn) / 1000,
-		CashOut: float64(totalAccountMonthData.CashOut / 1000),
+		CashOut: float64(totalAccountMonthData.CashOut) / 1000,
 	})
 	// 获取每月数据
 	everyAccountMonthData := make([]models.ChargeSummaryMonth, 0, 0)
