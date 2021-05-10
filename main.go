@@ -14,7 +14,7 @@ import (
 	"os"
 )
 
-func initConfig() {
+func init() {
 	err := initial.NewConfig()
 	if err != nil {
 		fmt.Println("Load config fail:", err)
@@ -43,7 +43,6 @@ func main() {
 
 	if !fiber.IsChild() {
 		// 只有在主线程的时候才会auto merge 数据结构
-		initConfig()
 		err := initial.AutoMigrate()
 		if err != nil {
 			fmt.Println("Migrate db fail:", err)
