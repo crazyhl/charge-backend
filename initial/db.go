@@ -7,10 +7,20 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"os"
+	"path/filepath"
 )
 
 func NewDb() (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open(viper.GetString("db.path")+viper.GetString("db.name")), &gorm.Config{
+	dbPath := viper.GetString("db.path")
+	if dbPath == "./" {
+		executable, getExecutableErr := os.Executable()
+		if getExecutableErr != nil {
+			panic(getExecutableErr)
+		}
+		dbPath = filepath.Dir(executable) + "/"
+	}
+	db, err := gorm.Open(sqlite.Open(dbPath+viper.GetString("db.name")), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
 		Logger:                                   logger.Default.LogMode(logger.Info),
 	})
