@@ -25,6 +25,28 @@ func SummaryMonthList(ctx *fiber.Ctx) error {
 	})
 }
 
+func SummaryUnRepaidData(ctx *fiber.Ctx) error {
+	db := container.GetContainer().GetDb()
+	allUnRepaidData := new(models.ChargeSummaryMonth)
+	db.Model(&models.ChargeSummaryMonth{}).
+		Select("sum(credit_in) as credit_in, sum(credit_out) as credit_out").
+		First(allUnRepaidData)
+	unRepaidAccountData := new(models.Account)
+	db.Model(&models.Account{}).
+		Select("sum(credit) as credit").
+		First(unRepaidAccountData)
+
+	creditOut := allUnRepaidData.CreditOut + unRepaidAccountData.Credit*-1
+	return ctx.JSON(fiber.Map{
+		"status": 0,
+		"data": fiber.Map{
+			"credit_in":       float64(allUnRepaidData.CreditIn) / 1000,
+			"credit_out":      float64(creditOut) / 1000,
+			"total_un_repaid": float64(creditOut-allUnRepaidData.CreditIn) / 1000,
+		},
+	})
+}
+
 func SummaryMonthData(ctx *fiber.Ctx) error {
 	db := container.GetContainer().GetDb()
 	month := ctx.Params("month")

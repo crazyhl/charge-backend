@@ -76,6 +76,7 @@ func main() {
 	statisticsGroup.Get("/summaryMonthList", statistics.SummaryMonthList)
 	statisticsGroup.Get("/summaryMonthData/:month", statistics.SummaryMonthData)
 	statisticsGroup.Get("/expensesCategory/:month", statistics.ExpensesCategory)
+	statisticsGroup.Get("/summaryUnRepaidData", statistics.SummaryUnRepaidData)
 
 	err := app.Listen(viper.GetString("http-server.host") + ":" + viper.GetString("http-server.port"))
 	if err != nil {
